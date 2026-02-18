@@ -9,19 +9,22 @@ import toast from 'react-hot-toast';
 
 const StudentSessions = () => {
   const [sessions, setSessions] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(null);
 
   useEffect(() => {
-    fetchSessions();
+    fetchAllData();
   }, []);
 
-  const fetchSessions = async () => {
+  const fetchAllData = async () => {
     try {
-      const response = await sessionService.getMySessions();
-      setSessions(response.data.sessions);
+      const sessionRes = await sessionService.getMySessions();
+      const requestRes = await sessionService.getMyRequests();
+
+      setSessions(sessionRes.data.sessions || []);
+      setRequests(requestRes.data.requests || []);
     } catch (error) {
-      console.error('Error fetching sessions:', error);
       toast.error('Failed to load sessions');
     } finally {
       setLoading(false);
@@ -45,10 +48,10 @@ const StudentSessions = () => {
         async (paymentData) => {
           try {
             await paymentService.verifyPayment(paymentData);
-            toast.success('Payment successful! Your session is confirmed.');
-            fetchSessions();
+            toast.success('Payment successful! Session confirmed.');
+            fetchAllData();
           } catch (error) {
-            console.error('Payment verification error:', error);
+            toast.error('Payment verification failed');
           } finally {
             setProcessingPayment(null);
           }
@@ -59,89 +62,118 @@ const StudentSessions = () => {
         }
       );
     } catch (error) {
-      console.error('Payment initiation error:', error);
+      toast.error('Payment initiation failed');
       setProcessingPayment(null);
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      scheduled: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Scheduled' },
-      paid: { bg: 'bg-green-100', text: 'text-green-800', label: 'Paid' },
-      completed: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Completed' },
-      cancelled: { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelled' },
-    };
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString();
 
-    const config = statusConfig[status] || statusConfig.scheduled;
-
-    return (
-      <span className={`${config.bg} ${config.text} px-3 py-1 rounded-full text-sm font-medium`}>
-        {config.label}
-      </span>
-    );
-  };
-
-  if (loading) {
-    return <LoadingSpinner fullScreen />;
-  }
+  if (loading) return <LoadingSpinner fullScreen />;
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">My Sessions</h1>
+      <h1 className="text-3xl font-bold mb-8">My Sessions</h1>
 
+      {/* ---------------- PENDING REQUESTS ---------------- */}
+      {requests.filter(r => r.status === 'pending').length > 0 && (
+        <div className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Pending Requests</h2>
+          <div className="space-y-4">
+            {requests
+              .filter(r => r.status === 'pending')
+              .map((request) => (
+                <Card key={request.id}>
+                  <h3 className="font-semibold text-lg">
+                    Request to {request.tutor_name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {formatDate(request.requested_date)} at {request.requested_time.slice(0,5)}
+                  </p>
+                  <span className="text-yellow-600 font-medium">
+                    Waiting for tutor approval
+                  </span>
+                </Card>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- REJECTED REQUESTS ---------------- */}
+      {requests.filter(r => r.status === 'rejected').length > 0 && (
+        <div className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Rejected Requests</h2>
+          <div className="space-y-4">
+            {requests
+              .filter(r => r.status === 'rejected')
+              .map((request) => (
+                <Card key={request.id}>
+                  <h3 className="font-semibold text-lg">
+                    Request to {request.tutor_name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {formatDate(request.requested_date)} at {request.requested_time.slice(0,5)}
+                  </p>
+                  <span className="text-red-600 font-medium">
+                    Rejected
+                  </span>
+                </Card>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- CONFIRMED SESSIONS ---------------- */}
       {sessions.length === 0 ? (
         <Card>
           <p className="text-center text-gray-600">
-            No sessions yet. Start by searching for tutors!
+            No confirmed sessions yet.
           </p>
         </Card>
       ) : (
         <div className="space-y-6">
           {sessions.map((session) => (
             <Card key={session.id}>
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">
+                  <h3 className="text-xl font-semibold">
                     Session with {session.tutor_name}
                   </h3>
-                  <p className="text-gray-600 text-sm mt-1">{session.tutor_email}</p>
+                  <p className="text-sm text-gray-600">
+                    {session.tutor_email}
+                  </p>
                 </div>
-                {getStatusBadge(session.status)}
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100">
+                  {session.status}
+                </span>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-600">Date</p>
-                  <p className="font-medium">{new Date(session.scheduled_date).toLocaleDateString()}</p>
+                  <p className="font-medium">
+                    {formatDate(session.scheduled_date)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Time</p>
-                  <p className="font-medium">{session.scheduled_time.slice(0, 5)}</p>
+                  <p className="font-medium">
+                    {session.scheduled_time.slice(0,5)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Duration</p>
-                  <p className="font-medium">{session.duration_minutes} minutes</p>
+                  <p className="font-medium">
+                    {session.duration_minutes} minutes
+                  </p>
                 </div>
-                {session.class_name && (
-                  <div>
-                    <p className="text-sm text-gray-600">Subject</p>
-                    <p className="font-medium">{session.class_name} - {session.topic_name}</p>
-                  </div>
-                )}
               </div>
-
-              {session.notes && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600">Notes</p>
-                  <p className="text-gray-700">{session.notes}</p>
-                </div>
-              )}
 
               {session.status === 'scheduled' && (
                 <Button
                   onClick={() => handlePayment(session)}
                   loading={processingPayment === session.id}
-                  className="mt-4"
                 >
                   Pay Now
                 </Button>
@@ -150,27 +182,21 @@ const StudentSessions = () => {
               {session.status === 'paid' && session.zoom_meeting_link && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <h4 className="font-semibold text-green-900 mb-2">
-                    Session Confirmed! 🎉
+                    Session Confirmed 🎉
                   </h4>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-sm text-gray-700">Zoom Meeting Link:</p>
-                      <a
-                        href={session.zoom_meeting_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 font-medium break-all"
-                      >
-                        {session.zoom_meeting_link}
-                      </a>
-                    </div>
-                    {session.zoom_password && (
-                      <div>
-                        <p className="text-sm text-gray-700">Meeting Password:</p>
-                        <p className="font-mono font-semibold">{session.zoom_password}</p>
-                      </div>
-                    )}
-                  </div>
+                  <a
+                    href={session.zoom_meeting_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 break-all"
+                  >
+                    {session.zoom_meeting_link}
+                  </a>
+                  {session.zoom_password && (
+                    <p className="mt-2 font-mono">
+                      Password: {session.zoom_password}
+                    </p>
+                  )}
                 </div>
               )}
             </Card>

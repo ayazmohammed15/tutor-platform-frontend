@@ -1,257 +1,208 @@
-import { useState } from "react";
-import Card from "../../components/common/Card";
-import Button from "../../components/common/Button";
-import Input from "../../components/common/Input";
-import toast from "react-hot-toast";
-import api from "../../services/api";
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { tutorService } from '../../services/tutorService';
+import { sessionService } from '../../services/sessionService';
+import api from '../../services/api';
+import Card from '../../components/common/Card';
+import Button from '../../components/common/Button';
+import Input from '../../components/common/Input';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import toast from 'react-hot-toast';
 
-const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const TutorProfile = () => {
+  const { tutorId } = useParams();
+  const navigate = useNavigate();
 
-const TutorAvailability = () => {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [tutor, setTutor] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [workingDays, setWorkingDays] = useState([]);
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("17:00");
+  const [selectedDate, setSelectedDate] = useState('');
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState('');
 
-  const [breakStart, setBreakStart] = useState("");
-  const [breakEnd, setBreakEnd] = useState("");
+  const [notes, setNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const [slotType, setSlotType] = useState(60);
-  const [excludedDates, setExcludedDates] = useState([]);
+  useEffect(() => {
+    fetchTutor();
+  }, [tutorId]);
 
-  /* ---------------- Working Days ---------------- */
-  const toggleDay = (day) => {
-    if (workingDays.includes(day)) {
-      setWorkingDays(workingDays.filter((d) => d !== day));
-    } else {
-      setWorkingDays([...workingDays, day]);
+  const fetchTutor = async () => {
+    try {
+      const res = await tutorService.getTutorDetails(tutorId);
+      setTutor(res.data.tutor);
+    } catch (err) {
+      toast.error('Failed to load tutor');
+    } finally {
+      setLoading(false);
     }
   };
 
-  /* ---------------- Excluded Dates ---------------- */
-  const addExcludedDate = (date) => {
+  /* ---------------- Fetch Slots When Date Changes ---------------- */
+  const fetchSlots = async (date) => {
     if (!date) return;
-    if (!excludedDates.includes(date)) {
-      setExcludedDates([...excludedDates, date]);
-    }
-  };
 
-  const removeExcludedDate = (date) => {
-    setExcludedDates(excludedDates.filter((d) => d !== date));
-  };
-
-  /* ---------------- Save ---------------- */
-  const saveAvailability = async () => {
-    if (!startDate || !endDate) {
-      toast.error("Select availability range");
-      return;
-    }
-
-    if (workingDays.length === 0) {
-      toast.error("Select at least one working day");
-      return;
-    }
-
-    if (!startTime || !endTime) {
-      toast.error("Select working hours");
-      return;
-    }
+    setSlotsLoading(true);
+    setAvailableSlots([]);
+    setSelectedSlot('');
 
     try {
-      let blocks = [];
+      const res = await api.get(
+        `/availability/tutor/${tutorId}/date/${date}`
+      );
 
-      if (breakStart && breakEnd) {
-        blocks = [
-          {
-            start_time: startTime,
-            end_time: breakStart,
-            slot_duration: slotType,
-          },
-          {
-            start_time: breakEnd,
-            end_time: endTime,
-            slot_duration: slotType,
-          },
-        ];
-      } else {
-        blocks = [
-          {
-            start_time: startTime,
-            end_time: endTime,
-            slot_duration: slotType,
-          },
-        ];
-      }
-
-      const payload = {
-        start_date: startDate,
-        end_date: endDate,
-        weekly_schedule: workingDays.map((day) => ({
-          day,
-          blocks,
-        })),
-        excluded_dates: excludedDates,
-      };
-
-      await api.post("/availability/save", payload);
-
-      toast.success("Availability saved successfully");
+      setAvailableSlots(res.data.data.slots);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to save availability");
+      setAvailableSlots([]);
+      toast.error(
+        err.response?.data?.message || 'No availability for this date'
+      );
+    } finally {
+      setSlotsLoading(false);
     }
   };
 
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+    fetchSlots(date);
+  };
+
+  /* ---------------- Booking ---------------- */
+  const handleBooking = async (e) => {
+    e.preventDefault();
+
+    if (!selectedDate || !selectedSlot) {
+      toast.error('Select date and time slot');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      await sessionService.createSessionRequest({
+        tutor_id: parseInt(tutorId),
+        requested_date: selectedDate,
+        requested_time: selectedSlot,
+        notes,
+      });
+
+      toast.success('Session request sent!');
+      navigate('/student/sessions');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Booking failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) return <LoadingSpinner fullScreen />;
+
+  if (!tutor) {
+    return (
+      <div className="text-center py-10">
+        <h2 className="text-xl font-bold">Tutor not found</h2>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-10">
+    <div className="grid lg:grid-cols-3 gap-8">
 
-      <h2 className="text-3xl font-bold text-gray-800">
-        Set Your Availability
-      </h2>
+      {/* LEFT SIDE - Tutor Info */}
+      <div className="lg:col-span-2">
+        <Card>
+          <h1 className="text-3xl font-bold">{tutor.full_name}</h1>
+          <p className="text-gray-600">{tutor.email}</p>
 
-      {/* 1️⃣ Month Range */}
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-6">
-          1. Availability Period
-        </h3>
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Experience</p>
+              <p className="font-semibold">{tutor.experience_years} years</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Rate</p>
+              <p className="font-semibold text-blue-600">
+                ₹{tutor.hourly_rate}/hour
+              </p>
+            </div>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <Input
-            type="date"
-            label="Start Date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
+          <div className="mt-6">
+            <h3 className="font-semibold mb-2">About</h3>
+            <p>{tutor.bio}</p>
+          </div>
+        </Card>
+      </div>
 
-          <Input
-            type="date"
-            label="End Date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-      </Card>
+      {/* RIGHT SIDE - Booking */}
+      <div>
+        <Card>
+          <h2 className="text-xl font-semibold mb-4">Book Session</h2>
 
-      {/* 2️⃣ Working Days */}
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-6">
-          2. Working Days
-        </h3>
+          <form onSubmit={handleBooking} className="space-y-4">
 
-        <div className="flex flex-wrap gap-3">
-          {DAYS.map((day) => (
-            <button
-              key={day}
-              onClick={() => toggleDay(day)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                workingDays.includes(day)
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
-              }`}
-            >
-              {day}
-            </button>
-          ))}
-        </div>
-      </Card>
+            {/* Date */}
+            <Input
+              type="date"
+              label="Select Date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              min={new Date().toISOString().split('T')[0]}
+              required
+            />
 
-      {/* 3️⃣ Working Hours */}
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-6">
-          3. Working Hours
-        </h3>
+            {/* Slots */}
+            {slotsLoading && <LoadingSpinner />}
 
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <Input
-            type="time"
-            label="Start Time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-          />
+            {availableSlots.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Available Time Slots
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableSlots.map((slot) => (
+                    <button
+                      type="button"
+                      key={slot}
+                      onClick={() => setSelectedSlot(slot)}
+                      className={`px-3 py-2 rounded border text-sm transition ${
+                        selectedSlot === slot
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 hover:bg-blue-100'
+                      }`}
+                    >
+                      {slot}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          <Input
-            type="time"
-            label="End Time"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
-        </div>
+            {selectedDate && !slotsLoading && availableSlots.length === 0 && (
+              <p className="text-sm text-gray-500">
+                No slots available for this date
+              </p>
+            )}
 
-        <h4 className="font-medium mb-3">Optional Break</h4>
+            {/* Notes */}
+            <textarea
+              rows="3"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Optional notes..."
+              className="w-full border rounded-lg px-3 py-2"
+            />
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <Input
-            type="time"
-            label="Break Start"
-            value={breakStart}
-            onChange={(e) => setBreakStart(e.target.value)}
-          />
-
-          <Input
-            type="time"
-            label="Break End"
-            value={breakEnd}
-            onChange={(e) => setBreakEnd(e.target.value)}
-          />
-        </div>
-      </Card>
-
-      {/* 4️⃣ Slot Duration */}
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-6">
-          4. Slot Duration
-        </h3>
-
-        <div className="flex gap-4">
-          {[30, 60].map((d) => (
-            <button
-              key={d}
-              onClick={() => setSlotType(d)}
-              className={`px-6 py-3 rounded-lg font-medium transition ${
-                slotType === d
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
-              }`}
-            >
-              {d} Minutes
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* 5️⃣ Excluded Dates */}
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-6">
-          5. Unavailable Dates
-        </h3>
-
-        <Input
-          type="date"
-          onChange={(e) => addExcludedDate(e.target.value)}
-        />
-
-        <div className="flex flex-wrap gap-3 mt-5">
-          {excludedDates.map((date) => (
-            <span
-              key={date}
-              className="bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm flex items-center gap-2"
-            >
-              {date}
-              <button onClick={() => removeExcludedDate(date)}>
-                ✕
-              </button>
-            </span>
-          ))}
-        </div>
-      </Card>
-
-      <Button onClick={saveAvailability} fullWidth>
-        Save Availability
-      </Button>
+            <Button type="submit" fullWidth loading={submitting}>
+              Send Request
+            </Button>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 };
 
-export default TutorAvailability;
+export default TutorProfile;
