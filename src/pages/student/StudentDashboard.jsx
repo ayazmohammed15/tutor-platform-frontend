@@ -130,13 +130,18 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Find Your Tutor</h1>
+    <div className="space-y-8">
+      <section className="rounded-2xl border border-blue-100 bg-gradient-to-r from-sky-50 via-white to-cyan-50 p-6">
+        <h1 className="text-3xl font-bold text-gray-900">Find Your Tutor</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Filter by class, chapter, and topic to discover tutors faster.
+        </p>
+      </section>
 
-      <Card className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Search Filters</h2>
+      <Card className="rounded-2xl border border-gray-100 shadow-sm">
+        <h2 className="text-xl font-semibold mb-6">Search Filters</h2>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6">
           <Select
             label="Class"
             name="class_name"
@@ -167,9 +172,18 @@ const StudentDashboard = () => {
           />
         </div>
 
-        <Button onClick={handleSearch} loading={loading} className="mt-6">
-          Find My Tutor
-        </Button>
+        <div className="mt-2 flex flex-wrap gap-3">
+          <Button onClick={handleSearch} loading={loading} className="mt-2">
+            Find My Tutor
+          </Button>
+          <Button
+            variant="secondary"
+            className="mt-2"
+            onClick={() => navigate('/student/sessions')}
+          >
+            View My Sessions
+          </Button>
+        </div>
       </Card>
 
       {loading && (
@@ -231,14 +245,6 @@ const StudentDashboard = () => {
         </div>
       )}
 
-      <div className="mt-8">
-        <Button
-          variant="secondary"
-          onClick={() => navigate('/student/sessions')}
-        >
-          View My Sessions
-        </Button>
-      </div>
     </div>
   );
 };
