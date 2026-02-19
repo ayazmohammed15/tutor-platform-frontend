@@ -8,11 +8,13 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { useLocation } from 'react-router-dom';
 
 const TutorProfile = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const subject_id = location.state?.subject_id;
   const [tutor, setTutor] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,7 @@ const TutorProfile = () => {
     try {
       const requestData = {
         tutor_id: parseInt(tutorId),
+        subject_id: subject_id,
         requested_date: bookingData.requested_date,
         requested_time: bookingData.requested_time,
         notes: bookingData.notes,
