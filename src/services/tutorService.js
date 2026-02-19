@@ -18,13 +18,16 @@ export const tutorService = {
 
   searchTutors: async (filters = {}) => {
     const params = new URLSearchParams();
-    if (filters.class_name) params.append('class_name', filters.class_name);
-    if (filters.chapter_name) params.append('chapter_name', filters.chapter_name);
-    if (filters.topic_name) params.append('topic_name', filters.topic_name);
+
+    if (filters.board_id) params.append('board_id', filters.board_id);
+    if (filters.class_id) params.append('class_id', filters.class_id);
+    if (filters.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters.chapter_id) params.append('chapter_id', filters.chapter_id);
 
     const response = await api.get(`/tutors/search?${params.toString()}`);
     return response.data;
   },
+
 
   getTutorDetails: async (tutorId) => {
     const response = await api.get(`/tutors/${tutorId}`);
@@ -45,7 +48,7 @@ export const tutorService = {
     const response = await api.put(`/tutors/${tutorId}/reject`);
     return response.data;
   },
-   
+
   sendRegistrationInvite: (data) =>
     api.post("/admin/send-tutor-invite", data),
 

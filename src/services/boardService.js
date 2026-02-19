@@ -12,10 +12,17 @@ export const boardService = {
   },
 
   getSubjectsByClass: async (boardId, classId) => {
-  const response = await api.get(
-    `/boards/subjects?boardId=${boardId}&classId=${classId}`
-  );
-  return response.data;
-},
+    const response = await api.get(
+      `/boards/subjects?boardId=${boardId}&classId=${classId}`
+    );
+    return response.data;
+  },
+  getChaptersBySubject: async (subjectId) => {
+    const response = await api.get(
+      `/boards/chapters?subjectId=${subjectId}`
+    );
+    return response.data;
+  },
+
 
 };
