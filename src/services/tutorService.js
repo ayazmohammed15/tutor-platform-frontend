@@ -45,4 +45,17 @@ export const tutorService = {
     const response = await api.put(`/tutors/${tutorId}/reject`);
     return response.data;
   },
+   
+  sendRegistrationInvite: (data) =>
+    api.post("/admin/send-tutor-invite", data),
+
+  getPendingTutors: () =>
+    api.get("/admin/pending-tutors"),
+
+  approveTutor: (id) =>
+    api.put(`/admin/approve/${id}`),
+
+  rejectTutor: (id) =>
+    api.put(`/admin/reject/${id}`)
+
 };

@@ -41,19 +41,9 @@ const Layout = ({ children }) => {
                     Dashboard
                   </Link>
                   <div className="flex items-center space-x-2">
-                    {user.role === 'tutor' ? (
-                      <button
-                        onClick={() => navigate('/tutor/profile')}
-                        className="text-blue-600 hover:underline text-sm font-medium"
-                      >
-                        {user.full_name} ({user.role})
-                      </button>
-                    ) : (
-                      <span className="text-gray-700 text-sm">
-                        {user.full_name} ({user.role})
-                      </span>
-                    )}
-
+                    <span className="text-gray-700 text-sm">
+                      {user.full_name} ({user.role})
+                    </span>
                     <button
                       onClick={handleLogout}
                       className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"

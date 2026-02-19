@@ -15,6 +15,9 @@ import StudentSessions from './pages/student/StudentSessions';
 import TutorDashboard from './pages/tutor/TutorDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import TutorsProfile from './pages/tutor/TutorsProfile';
+import SetPassword from './pages/auth/SetPassword';
+import TutorRegister from './pages/tutor/TutorRegister';
+import AdminLayout from './components/layouts/AdminLayout';
 
 function App() {
   return (
@@ -220,16 +223,23 @@ function App() {
           />
 
 
+          {/* ================= ADMIN ROUTES ================= */}
           <Route
-            path="/admin/dashboard"
+            path="/admin"
             element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <Layout>
-                  <AdminDashboard />
-                </Layout>
+                <AdminLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<AdminDashboard />} />
+          </Route>
+<Route path="/set-password" element={<SetPassword />} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+<Route path="/tutor-register" element={<TutorRegister />} />
+      
           
 
           <Route path="*" element={<Navigate to="/" replace />} />

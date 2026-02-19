@@ -44,7 +44,9 @@ const Login = () => {
           navigate('/');
         }
       }
+      console.log("LOGIN RESPONSE:", response);
     } catch (error) {
+      debugger
       console.error('Login error:', error);
     } finally {
       setLoading(false);
