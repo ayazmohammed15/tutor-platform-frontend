@@ -2,9 +2,15 @@ import RoleSidebar from './RoleSidebar';
 
 const RoleLayout = ({ role, children }) => {
   return (
-    <div className="grid min-h-[calc(100vh-8rem)] gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
       <RoleSidebar role={role} />
-      <div className="min-w-0">{children}</div>
+
+      {/* Main Content */}
+      <main className="ml-64 flex-1 p-8">
+        {children}
+      </main>
+      
     </div>
   );
 };

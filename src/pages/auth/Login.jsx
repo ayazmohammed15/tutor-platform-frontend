@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate,useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
@@ -7,8 +7,11 @@ import Card from '../../components/common/Card';
 import toast from 'react-hot-toast';
 
 const Login = () => {
+   const location = useLocation();
+  const prefillEmail = location.state?.email || '';
+
   const [formData, setFormData] = useState({
-    email: '',
+    email: prefillEmail,
     password: '',
   });
   const [loading, setLoading] = useState(false);

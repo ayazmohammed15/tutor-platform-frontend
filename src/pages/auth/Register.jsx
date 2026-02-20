@@ -2,21 +2,21 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/common/Input';
-import Select from '../../components/common/Select';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import toast from 'react-hot-toast';
 
 const Register = () => {
   const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
     email: '',
-    password: '',
-    full_name: '',
     phone: '',
-    role: 'student',
+    password: '',
+    confirmPassword: '',
   });
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -29,51 +29,66 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ✅ Password Match Validation
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await register(formData);
+      const response = await register({
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+      });
 
       if (response.success) {
-        toast.success('Registration successful! Welcome aboard!');
-
-        const role = response.data.user.role;
-        if (role === 'student') {
-          navigate('/student/dashboard');
-        } else if (role === 'tutor') {
-          navigate('/tutor/dashboard');
-        } else {
-          navigate('/');
-        }
+        toast.success("Registration successful! Please login to continue.");
+        navigate('/login', { state: { email: formData.email } });
       }
+
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
+      toast.error("Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const roleOptions = [
-    { value: 'student', label: 'Student' },
-    { value: 'tutor', label: 'Tutor' },
-  ];
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
       <Card className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-          <p className="text-gray-600 mt-2">Join our tutoring platform</p>
+          <p className="text-gray-600 mt-2">
+            You are registering as <span className="font-semibold text-blue-600">Student</span>
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
+
           <Input
-            label="Full Name"
+            label="First Name"
             type="text"
-            name="full_name"
-            value={formData.full_name}
+            name="first_name"
+            value={formData.first_name}
             onChange={handleChange}
-            placeholder="Enter your full name"
+            placeholder="Enter your first name"
+            required
+          />
+
+          <Input
+            label="Last Name"
+            type="text"
+            name="last_name"
+            value={formData.last_name}
+            onChange={handleChange}
+            placeholder="Enter your last name"
             required
           />
 
@@ -88,12 +103,13 @@ const Register = () => {
           />
 
           <Input
-            label="Phone"
+            label="Mobile Number"
             type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="Enter your phone number"
+            placeholder="Enter your mobile number"
+            required
           />
 
           <Input
@@ -106,28 +122,34 @@ const Register = () => {
             required
           />
 
-          <Select
-            label="I am a"
-            name="role"
-            value={formData.role}
+          <Input
+            label="Confirm Password"
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
             onChange={handleChange}
-            options={roleOptions}
+            placeholder="Confirm your password"
             required
           />
 
           <Button type="submit" loading={loading} fullWidth className="mt-6">
             Register
           </Button>
+
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link
+              to="/login"
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
               Sign in here
             </Link>
           </p>
         </div>
+
       </Card>
     </div>
   );
