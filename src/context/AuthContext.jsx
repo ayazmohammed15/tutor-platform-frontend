@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
@@ -6,6 +7,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // 2. Initialize navigate
 
   useEffect(() => {
     const initAuth = () => {
@@ -36,8 +38,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // 3. Clear data and redirect
     authService.logout();
     setUser(null);
+    navigate('/login'); // Redirects the user immediately to the login page
   };
 
   const value = {

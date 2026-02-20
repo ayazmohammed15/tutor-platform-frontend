@@ -14,6 +14,11 @@ import TutorProfile from './pages/student/TutorProfile';
 import StudentSessions from './pages/student/StudentSessions';
 import TutorDashboard from './pages/tutor/TutorDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminTutors from './pages/admin/AdminTutors';
+import AdminBookings from './pages/admin/AdminBookings';
+import AdminPayments from './pages/admin/AdminPayments';
+import AdminStudents from './pages/admin/AdminStudents';
+import AdminSubjects from './pages/admin/AdminSubjects';
 import TutorsProfile from './pages/tutor/TutorsProfile';
 import SetPassword from './pages/auth/SetPassword';
 import TutorRegister from './pages/tutor/TutorRegister';
@@ -222,8 +227,7 @@ function App() {
             }
           />
 
-
-          {/* ================= ADMIN ROUTES ================= */}
+         {/* ================= ADMIN ROUTES ================= */}
           <Route
             path="/admin"
             element={
@@ -232,7 +236,15 @@ function App() {
               </ProtectedRoute>
             }
           >
+            {/* The Dashboard is the default index */}
             <Route path="dashboard" element={<AdminDashboard />} />
+            
+            {/* The new scaffolded pages */}
+            <Route path="students" element={<AdminStudents />} />
+            <Route path="tutors" element={<AdminTutors />} />
+            <Route path="subjects" element={<AdminSubjects />} />
+            <Route path="bookings" element={<AdminBookings />} />
+            <Route path="payments" element={<AdminPayments />} />
           </Route>
 <Route path="/set-password" element={<SetPassword />} />
 
