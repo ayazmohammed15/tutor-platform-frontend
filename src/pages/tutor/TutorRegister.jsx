@@ -58,7 +58,7 @@ const TutorRegister = () => {
     graduationYear: "",
     experienceYears: "",
     boardId: "",
-    classId: "",
+    classIds: [],
     subjects: [],
     teachingMode: "",
     expectedFee: "",
@@ -77,66 +77,66 @@ const TutorRegister = () => {
       setFormData({ ...formData, [name]: value });
     }
   };
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!token) {
-    toast.error("Invalid registration link");
-    return;
-  }
+    if (!token) {
+      toast.error("Invalid registration link");
+      return;
+    }
 
-  if (!formData.resume) {
-    toast.error("Resume is mandatory");
-    return;
-  }
+    if (!formData.resume) {
+      toast.error("Resume is mandatory");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const data = new FormData();
+      const data = new FormData();
 
-    data.append("token", token);
-    data.append("firstName", formData.firstName);   // ✅ added
-    data.append("lastName", formData.lastName);     // ✅ added
-    data.append("phone", formData.phone);
-    data.append("qualification", formData.qualification);
-    data.append("university", formData.university);
-    data.append("graduationYear", formData.graduationYear);
-    data.append("experienceYears", formData.experienceYears);
-    data.append("boardId", formData.boardId);
-    data.append("classId", formData.classId);
-    data.append("teachingMode", formData.teachingMode);
-    data.append("expectedFee", formData.expectedFee);
-    data.append("about", formData.about);
-    data.append("demoLink", formData.demoLink);
+      data.append("token", token);
+      data.append("firstName", formData.firstName);   // ✅ added
+      data.append("lastName", formData.lastName);     // ✅ added
+      data.append("phone", formData.phone);
+      data.append("qualification", formData.qualification);
+      data.append("university", formData.university);
+      data.append("graduationYear", formData.graduationYear);
+      data.append("experienceYears", formData.experienceYears);
+      data.append("boardId", formData.boardId);
+      data.append("classIds", JSON.stringify(formData.classIds));
+      data.append("teachingMode", formData.teachingMode);
+      data.append("expectedFee", formData.expectedFee);
+      data.append("about", formData.about);
+      data.append("demoLink", formData.demoLink);
 
-    data.append("subjects", JSON.stringify(formData.subjects));
+      data.append("subjects", JSON.stringify(formData.subjects));
 
 
-    // Files
-    data.append("profilePhoto", formData.profilePhoto);
-    data.append("resume", formData.resume);
+      // Files
+      data.append("profilePhoto", formData.profilePhoto);
+      data.append("resume", formData.resume);
 
-    await axios.post(
-      "http://localhost:5000/api/auth/complete-registration",
-      data,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+      await axios.post(
+        "http://localhost:5000/api/auth/complete-registration",
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    toast.success("Registration submitted successfully! Await admin approval.");
+      toast.success("Registration submitted successfully! Await admin approval.");
 
-  } catch (error) {
-    toast.error(
-      error.response?.data?.message || "Registration failed"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Registration failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
@@ -230,41 +230,41 @@ const handleSubmit = async (e) => {
 
               {/* CLASS */}
               <Select
+                isMulti   // ✅ important
                 options={classOptions}
-                placeholder="Select Class"
-                onChange={async (opt) => {
-                  console.log("Selected Class:", opt);
+                placeholder="Select Classes"
+                onChange={async (opts) => {
 
-                  setFormData((prev) => ({
+                  const selectedClassIds = opts ? opts.map(o => o.value) : [];
+
+                  setFormData(prev => ({
                     ...prev,
-                    classId: opt.value,
+                    classIds: selectedClassIds,
                     subjects: []
                   }));
 
-                  try {
-                    const data = await boardService.getSubjectsByClass(
-                      formData.boardId,
-                      opt.value
-                    );
+                  if (!selectedClassIds.length) {
+                    setSubjectOptions([]);
+                    return;
+                  }
 
-                    console.log("Subjects API Response:", data);
+                  try {
+                    const data = await boardService.getSubjectsByClasses(
+                      formData.boardId,
+                      selectedClassIds
+                    );
 
                     const formatted = data.map((s) => ({
                       value: s.id,
-                      label: s.subject_name,
+                      label: `${s.subject_name} - ${s.class_name}`,
                     }));
-
-
-                    console.log("Formatted Subjects:", formatted);
 
                     setSubjectOptions(formatted);
                   } catch (error) {
-                    console.error("Subjects Load Error:", error);
                     toast.error("Failed to load subjects");
                   }
                 }}
               />
-
               {/* SUBJECTS */}
               <Select
                 isMulti

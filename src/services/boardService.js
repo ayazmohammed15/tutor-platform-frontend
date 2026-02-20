@@ -11,9 +11,13 @@ export const boardService = {
     return response.data;
   },
 
-  getSubjectsByClass: async (boardId, classId) => {
-    const response = await api.get(
-      `/boards/subjects?boardId=${boardId}&classId=${classId}`
+  getSubjectsByClasses: async (boardId, classIds) => {
+    const response = await api.post(
+      `/boards/subjects`,
+      {
+        boardId,
+        classIds
+      }
     );
     return response.data;
   },

@@ -15,6 +15,7 @@ const TutorProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const subject_id = location.state?.subject_id;
+  const chapter_ids = location.state?.chapter_ids || [];
   const [tutor, setTutor] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);

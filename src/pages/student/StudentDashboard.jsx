@@ -15,11 +15,13 @@ const StudentDashboard = () => {
   const [boards, setBoards] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [chapters, setChapters] = useState([]);
 
   const [filters, setFilters] = useState({
     board_id: "",
     class_id: "",
-    subject_id: ""
+    subject_id: "",
+    chapter_ids: []
   });
 
   const [tutors, setTutors] = useState([]);
@@ -61,9 +63,9 @@ const StudentDashboard = () => {
 
     const loadSubjects = async () => {
       try {
-        const data = await boardService.getSubjectsByClass(
+        const data = await boardService.getSubjectsByClasses(
           filters.board_id,
-          filters.class_id
+          [filters.class_id]   // send as array
         );
         setSubjects(data);
       } catch (err) {
@@ -73,6 +75,23 @@ const StudentDashboard = () => {
 
     loadSubjects();
   }, [filters.board_id, filters.class_id]);
+
+  useEffect(() => {
+    if (!filters.subject_id) return;
+
+    const loadChapters = async () => {
+      try {
+        const data = await boardService.getChaptersBySubject(
+          filters.subject_id
+        );
+        setChapters(data);
+      } catch (err) {
+        toast.error("Failed to load chapters");
+      }
+    };
+
+    loadChapters();
+  }, [filters.subject_id]);
 
   /* ================= HANDLE CHANGE ================= */
   const handleChange = (e) => {
@@ -119,7 +138,9 @@ const StudentDashboard = () => {
 
   const handleTutorClick = (id) => {
     navigate(`/student/tutor/${id}`, {
-      state: { subject_id: filters.subject_id }
+      state: { subject_id: filters.subject_id,
+        chapter_ids: filters.chapter_ids
+       }
     });
   };
 
@@ -180,6 +201,29 @@ const StudentDashboard = () => {
             }))}
             disabled={!filters.class_id}
             placeholder="Select subject"
+          />
+
+          <Select
+            label="Chapters (Optional)"
+            name="chapter_ids"
+            value={filters.chapter_ids}
+            onChange={(e) => {
+              const selected = Array.from(
+                e.target.selectedOptions,
+                option => option.value
+              );
+
+              setFilters(prev => ({
+                ...prev,
+                chapter_ids: selected
+              }));
+            }}
+            options={chapters.map((c) => ({
+              value: c.id,
+              label: c.chapter_name
+            }))}
+            disabled={!filters.subject_id}
+            multiple
           />
 
         </div>
