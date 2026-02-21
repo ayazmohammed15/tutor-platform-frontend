@@ -57,6 +57,12 @@ export const availabilityService = {
     const response = await api.get(`/availability/tutor/${tutorId}`);
     return response.data;
   },
+  getAvailableSlotsByDate: async (tutorId, date) => {
+    const response = await api.get(
+      `/availability/tutor/${tutorId}/date/${date}`
+    );
+    return response.data;
+  },
 
   updateSlot: async (slotId, updates) => {
     const response = await api.put(`/availability/${slotId}`, updates);

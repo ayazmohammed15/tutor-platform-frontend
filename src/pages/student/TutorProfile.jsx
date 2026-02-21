@@ -19,6 +19,7 @@ const TutorProfile = () => {
   const [tutor, setTutor] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [slots, setSlots] = useState([]);
   const [bookingData, setBookingData] = useState({
     requested_date: '',
     requested_time: '',
@@ -44,6 +45,32 @@ const TutorProfile = () => {
       toast.error('Failed to load tutor details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDateChange = async (e) => {
+    const selectedDate = e.target.value;
+
+    setBookingData(prev => ({
+      ...prev,
+      requested_date: selectedDate,
+      requested_time: ''
+    }));
+
+    if (!selectedDate) return;
+
+    try {
+      const res = await availabilityService.getAvailableSlotsByDate(
+        tutorId,
+        selectedDate
+      );
+
+      console.log("API RESPONSE:", res); // check this once
+
+      setSlots(res.data.slots || []);
+    } catch (error) {
+      console.error("Error fetching slots:", error);
+      setSlots([]);
     }
   };
 
@@ -193,19 +220,44 @@ const TutorProfile = () => {
                 type="date"
                 name="requested_date"
                 value={bookingData.requested_date}
-                onChange={handleInputChange}
+                onChange={handleDateChange}
                 required
                 min={new Date().toISOString().split('T')[0]}
               />
 
-              <Input
-                label="Preferred Time"
-                type="time"
-                name="requested_time"
-                value={bookingData.requested_time}
-                onChange={handleInputChange}
-                required
-              />
+              {bookingData.requested_date && (
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                  {slots.length === 0 ? (
+                    <p className="text-sm text-gray-500 col-span-3">
+                      No slots available
+                    </p>
+                  ) : (
+                    slots.map(slot => (
+                      <button
+                        key={slot.time}
+                        type="button"
+                        disabled={slot.booked}
+                        onClick={() =>
+                          setBookingData(prev => ({
+                            ...prev,
+                            requested_time: slot.time
+                          }))
+                        }
+                        className={`px-3 py-2 rounded border text-sm
+            ${slot.booked
+                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                            : bookingData.requested_time === slot.time
+                              ? "bg-blue-600 text-white"
+                              : "bg-white hover:bg-blue-50"
+                          }
+          `}
+                      >
+                        {slot.time}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
