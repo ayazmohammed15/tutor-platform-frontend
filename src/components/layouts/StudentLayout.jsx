@@ -1,8 +1,37 @@
+import { useState } from 'react';
 import StudentSidebar from './StudentSidebar';
-import { Bell, Search, ChevronDown, Calendar } from 'lucide-react';
+import { Bell, Search, ChevronDown, Menu, LogOut, Calendar } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext'; // Adjust path if needed
 
 const StudentLayout = ({ children }) => {
-  // We can format today's date to display in the header
+  // Sidebar & Dropdown state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Fetch user data and logout function from context
+  const { user, logout } = useAuth();
+
+  // Helper to get initials
+  const getInitials = () => {
+    if (user?.first_name && user?.last_name) {
+      return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+    }
+    if (user?.first_name) {
+      return user.first_name[0].toUpperCase();
+    }
+    return "S"; // Default fallback for Student
+  };
+
+  // Helper to safely display the full name
+  const getFullName = () => {
+    if (user?.first_name && user?.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    if (user?.first_name) return user.first_name;
+    return "Student Account";
+  };
+
+  // Format today's date
   const currentDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     month: 'short', 
@@ -10,65 +39,111 @@ const StudentLayout = ({ children }) => {
   });
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans">
-      <StudentSidebar />
+    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900">
+      
+      {/* Sidebar gets the state passed as props */}
+      <StudentSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-      {/* Main Content Area */}
-      <main className="ml-64 flex-1 flex flex-col">
+      {/* Main Content Area - Adjusts margin based on sidebar state */}
+      <main className={`transition-all duration-300 flex flex-col min-w-0 ${isSidebarOpen ? 'md:ml-[260px]' : 'ml-0'}`}>
         
         {/* Top Header/Navbar */}
-        <header className="fixed top-0 right-0 left-64 h-20 bg-white/90 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 z-30 transition-all duration-300">
+        <header className={`fixed top-0 right-0 h-16 bg-white/90 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-30 shadow-sm transition-all duration-300 ${isSidebarOpen ? 'md:left-[260px] left-0' : 'left-0'}`}>
           
-          {/* Left Side: Greeting & Date */}
-          <div className="flex items-center gap-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 tracking-tight">Welcome back! 👋</h2>
-              <div className="flex items-center text-sm text-gray-500 font-medium mt-0.5">
-                <Calendar className="w-3.5 h-3.5 mr-1.5" />
+          <div className="flex items-center gap-3">
+            {/* Hamburger Menu Toggle */}
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 rounded-lg transition-colors"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
+            {/* Greeting & Date */}
+            <div className="hidden sm:block">
+              <h2 className="text-lg font-bold text-slate-800 tracking-tight">Welcome back! 👋</h2>
+              <div className="flex items-center text-xs text-slate-500 font-medium mt-0.5">
+                <Calendar className="w-3 h-3 mr-1.5" />
                 {currentDate}
               </div>
             </div>
           </div>
 
-          {/* Right Side: Search, Notifications, Profile */}
-          <div className="flex items-center gap-5">
-            
-            {/* Search Bar - Styled for a cleaner look */}
-            <div className="relative hidden md:block w-72">
-              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <div className="flex items-center gap-4 md:gap-6">
+            {/* Search Bar */}
+            <div className="relative w-48 md:w-64 hidden sm:block">
+              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
                 type="text" 
                 placeholder="Search subjects, tutors..." 
-                className="w-full bg-slate-100/80 text-sm rounded-full pl-11 pr-4 py-2.5 outline-none border border-transparent focus:bg-white focus:border-indigo-200 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                className="w-full bg-slate-100 text-sm rounded-xl pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all border-transparent"
               />
             </div>
 
-            {/* Divider */}
-            <div className="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
-
-            {/* Notification Bell */}
-            <button className="relative p-2.5 bg-slate-100 rounded-full text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+            {/* Notification */}
+            <button className="relative p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors rounded-full border border-slate-200">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
             
-            {/* Profile Dropdown Button */}
-            <button className="flex items-center gap-3 p-1 rounded-full hover:bg-slate-100 transition-colors pr-3 border border-transparent hover:border-slate-200">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold shadow-sm">
-                S
-              </div>
-              <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-bold text-gray-700 leading-tight">Student Name</span>
-                <span className="text-xs font-semibold text-indigo-600">Student Account</span>
-              </div>
-              <ChevronDown className="w-4 h-4 text-gray-400 hidden md:block ml-1" />
-            </button>
+            {/* ---------------- PROFILE DROPDOWN WIDGET ---------------- */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center gap-3 p-1 rounded-full hover:bg-slate-50 transition-colors focus:outline-none"
+              >
+                {/* Dynamic Initials Avatar */}
+                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-blue-100 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-sm shadow-sm">
+                  {getInitials()}
+                </div>
+                
+                {/* Dynamic Name */}
+                <span className="text-sm font-semibold text-slate-700 hidden md:block">
+                  {getFullName()}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-slate-400 hidden md:block transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Popup Dropdown Menu */}
+              {isProfileOpen && (
+                <>
+                  {/* Invisible Overlay to close menu when clicking outside */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsProfileOpen(false)}
+                  />
+                  
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-slate-100 py-2 z-50 transform transition-all animate-in fade-in slide-in-from-top-2">
+                    <div className="px-5 py-3 border-b border-slate-50">
+                      <p className="text-xs text-slate-500 font-medium">Signed in as</p>
+                      <p className="text-sm text-slate-900 font-bold truncate mt-1">
+                        {user?.email || 'student@tutofly.com'}
+                      </p>
+                    </div>
+                    
+                    <div className="py-2 px-2">
+                      <button
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          logout(); 
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors font-semibold flex items-center"
+                      >
+                        <LogOut className="w-4 h-4 mr-3" />
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            {/* ---------------- END PROFILE DROPDOWN ---------------- */}
 
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="mt-20 p-8 flex-1 overflow-x-hidden">
+        <div className="mt-16 p-4 md:p-8 flex-1 overflow-x-hidden">
           {children}
         </div>
         

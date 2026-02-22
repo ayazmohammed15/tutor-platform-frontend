@@ -66,89 +66,34 @@ function App() {
 
 
           <Route
-  path="/student/dashboard"
-  element={
-    <ProtectedRoute allowedRoles={['student']}>
-      <StudentLayout>
-        <StudentDashboard />
-      </StudentLayout>
-    </ProtectedRoute>
-  }
-/>
-
-          <Route
-            path="/student/profile"
+            path="/student"
             element={
               <ProtectedRoute allowedRoles={['student']}>
-                <Layout>
-                  <RoleLayout role="student">
-                    <RolePlaceholder
-                      title="My Profile"
-                      description="Student profile details will appear here."
-                    />
-                  </RoleLayout>
-                </Layout>
+                <StudentLayout>
+                  <Outlet /> {/* Renders the matching child route inside StudentLayout */}
+                </StudentLayout>
               </ProtectedRoute>
             }
-          />
-
-          <Route
-            path="/student/tutor/:tutorId"
-            element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <Layout>
-                  <RoleLayout role="student">
-                    <TutorProfile />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/student/sessions"
-            element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <Layout>
-                  <RoleLayout role="student">
-                    <StudentSessions />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/student/assignments"
-            element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <Layout>
-                  <RoleLayout role="student">
-                    <RolePlaceholder
-                      title="Assigments"
-                      description="Student assignments will appear here."
-                    />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/student/payments"
-            element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <Layout>
-                  <RoleLayout role="student">
-                    <RolePlaceholder
-                      title="Payments"
-                      description="Student payment history will appear here."
-                    />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+          >
+            {/* If user goes to /student, redirect to dashboard */}
+            <Route index element={<Navigate to="dashboard" replace />} />
+            
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="tutor/:tutorId" element={<TutorProfile />} />
+            <Route path="sessions" element={<StudentSessions />} />
+            <Route 
+              path="profile" 
+              element={<RolePlaceholder title="My Profile" description="Student profile details will appear here." />} 
+            />
+            <Route 
+              path="assignments" 
+              element={<RolePlaceholder title="Assignments" description="Student assignments will appear here." />} 
+            />
+            <Route 
+              path="payments" 
+              element={<RolePlaceholder title="Payments" description="Student payment history will appear here." />} 
+            />
+          </Route>
 
           {/* ================= TUTOR ROUTES ================= */}
           <Route
