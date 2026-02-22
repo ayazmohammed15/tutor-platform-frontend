@@ -42,7 +42,7 @@ const TutorSidebar = ({ isOpen, setIsOpen }) => {
         {/* Brand Header */}
         <div className="flex items-center justify-between px-8 py-6 h-16 flex-shrink-0">
           <h1 className="text-2xl font-bold text-white tracking-wide">
-            Tutofly<span className="text-[#0fb673]">.</span>
+            TutorBook<span className="text-[#0fb673]">.</span>
           </h1>
           {/* Close button strictly for mobile view */}
           <button 

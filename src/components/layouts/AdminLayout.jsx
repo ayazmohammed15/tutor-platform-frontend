@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext'; // Ensure this path is correct for your project
+import { UserCog } from 'lucide-react';
 
 // --- SVG Icons ---
 const SearchIcon = () => (
@@ -27,8 +28,10 @@ const AdminLayout = () => {
     { name: "Bookings", path: "/admin/bookings" },
     { name: "Payments", path: "/admin/payments" },
   ];
-// 🔴 ADD THIS LOG HERE:
+
+  // 🔴 ADD THIS LOG HERE:
   console.log("DEBUG: Current User Object ->", user);
+  
   // Helper function to safely get user initials (e.g., John Doe -> JD)
   const getInitials = () => {
     if (user?.first_name && user?.last_name) {
@@ -40,21 +43,25 @@ const AdminLayout = () => {
     return "A"; // Default fallback
   };
 
-  // Helper to safely display the full name
-  
-
   return (
     <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
       
       {/* 1. SIDEBAR */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex-col hidden md:flex flex-shrink-0">
-        <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold mr-3">
-            T
+        
+        {/* BRAND HEADER - FIXED SPACING */}
+        <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800 flex-shrink-0">
+          <div className="bg-white/10 p-2 rounded-xl flex items-center justify-center">
+            <UserCog className="w-5 h-5 text-blue-400" />
           </div>
-          <span className="text-white font-semibold text-lg tracking-wide">
-            TutorMatch HQ
-          </span>
+          <div className="flex flex-col justify-center">
+            <h2 className="text-xl font-bold tracking-tight text-white leading-none mt-1">
+              TutorBook<span className="text-blue-400">.</span>
+            </h2>
+            <p className="text-[10px] font-semibold text-blue-200 uppercase tracking-widest mt-1">
+              Admin Portal
+            </p>
+          </div>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-4">
@@ -79,15 +86,14 @@ const AdminLayout = () => {
         </nav>
         
         {/* Sidebar Bottom Profile Widget */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 flex items-center justify-center text-white font-medium shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 flex items-center justify-center text-white font-medium shadow-sm flex-shrink-0">
               {getInitials()}
             </div>
             <div className="overflow-hidden">
-              
               <p className="text-xs text-slate-400 truncate">
-                {user?.email || "admin@tutormatch.com"}
+                {user?.email || "admin@TutorBook.com"}
               </p>
             </div>
           </div>
@@ -146,7 +152,7 @@ const AdminLayout = () => {
                     <div className="px-4 py-3 border-b border-gray-50">
                       <p className="text-xs text-gray-500 font-medium">Signed in as</p>
                       <p className="text-sm text-gray-900 font-medium truncate mt-0.5">
-                        {user?.email || 'admin@tutormatch.com'}
+                        {user?.email || 'admin@TutorBook.com'}
                       </p>
                     </div>
                     
@@ -154,8 +160,6 @@ const AdminLayout = () => {
                       <button
                         onClick={() => {
                           setIsProfileOpen(false);
-                          // This calls the logout function from AuthContext
-                          // which will clear state and redirect to /login
                           logout(); 
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium flex items-center"

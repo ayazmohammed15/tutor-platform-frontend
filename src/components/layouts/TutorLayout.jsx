@@ -102,7 +102,7 @@ const TutorLayout = ({ children }) => {
                     <div className="px-5 py-3 border-b border-gray-50">
                       <p className="text-xs text-gray-500 font-medium">Signed in as</p>
                       <p className="text-sm text-gray-900 font-bold truncate mt-1">
-                        {user?.email || 'tutor@tutormatch.com'}
+                        {user?.email || 'tutor@TutorBook.com'}
                       </p>
                     </div>
                     

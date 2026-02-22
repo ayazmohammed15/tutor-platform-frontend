@@ -117,7 +117,7 @@ const StudentLayout = ({ children }) => {
                     <div className="px-5 py-3 border-b border-slate-50">
                       <p className="text-xs text-slate-500 font-medium">Signed in as</p>
                       <p className="text-sm text-slate-900 font-bold truncate mt-1">
-                        {user?.email || 'student@tutofly.com'}
+                        {user?.email || 'student@TutorBook.com'}
                       </p>
                     </div>
                     
