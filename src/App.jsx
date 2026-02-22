@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate,Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -23,6 +23,12 @@ import TutorsProfile from './pages/tutor/TutorsProfile';
 import SetPassword from './pages/auth/SetPassword';
 import TutorRegister from './pages/tutor/TutorRegister';
 import AdminLayout from './components/layouts/AdminLayout';
+import StudentLayout from './components/layouts/StudentLayout';
+import TutorLayout from './components/layouts/TutorLayout';
+import TutorSessions from './pages/tutor/TutorSessions';
+import TutorAssignments from './pages/tutor/TutorAssignments';
+import TutorPayments from './pages/tutor/TutorPayments';
+import TutorAvailability from './pages/tutor/TutorAvailability';
 
 function App() {
   return (
@@ -56,28 +62,19 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
+
 
           <Route
-            path="/"
-            element={
-              <Layout>
-                <Home />
-              </Layout>
-            }
-          />
-
-          <Route
-            path="/student/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <Layout>
-                  <RoleLayout role="student">
-                    <StudentDashboard />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+  path="/student/dashboard"
+  element={
+    <ProtectedRoute allowedRoles={['student']}>
+      <StudentLayout>
+        <StudentDashboard />
+      </StudentLayout>
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="/student/profile"
@@ -153,79 +150,24 @@ function App() {
             }
           />
 
+          {/* ================= TUTOR ROUTES ================= */}
           <Route
-            path="/tutor/dashboard"
+            path="/tutor"
             element={
               <ProtectedRoute allowedRoles={['tutor']}>
-                <Layout>
-                  <RoleLayout role="tutor">
-                    <RolePlaceholder
-                      title="Dashboard"
-                      description="Tutor dashboard content will appear here."
-                    />
-                  </RoleLayout>
-                </Layout>
+                <TutorLayout>
+                  <Outlet /> {/* Renders the matching child route here */}
+                </TutorLayout>
               </ProtectedRoute>
             }
-          />
-
-          <Route
-            path="/tutor/profile"
-            element={
-              <ProtectedRoute allowedRoles={['tutor']}>
-                <Layout>
-                  <RoleLayout role="tutor">
-                    <TutorsProfile />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/tutor/sessions"
-            element={
-              <ProtectedRoute allowedRoles={['tutor']}>
-                <Layout>
-                  <RoleLayout role="tutor">
-                    <TutorDashboard />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/tutor/assignments"
-            element={
-              <ProtectedRoute allowedRoles={['tutor']}>
-                <Layout>
-                  <RoleLayout role="tutor">
-                    <RolePlaceholder
-                      title="Assigments"
-                      description="Tutor assignments will appear here."
-                    />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/tutor/payments"
-            element={
-              <ProtectedRoute allowedRoles={['tutor']}>
-                <Layout>
-                  <RoleLayout role="tutor">
-                    <RolePlaceholder
-                      title="Payments"
-                      description="Tutor payments and payouts will appear here."
-                    />
-                  </RoleLayout>
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route path="dashboard" element={<TutorDashboard />} />
+            <Route path="sessions" element={<TutorSessions />} />
+            <Route path='availability' element={<TutorAvailability />}/>
+            <Route path="assignments" element={<TutorAssignments />} />
+            <Route path="payments" element={<TutorPayments />} />
+            <Route path="profile" element={<TutorsProfile />} />
+          </Route>
 
          {/* ================= ADMIN ROUTES ================= */}
           <Route

@@ -7,11 +7,13 @@ import Button from "../../components/common/Button";
 import Select from "../../components/common/Select";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import toast from "react-hot-toast";
+import { Search, BookOpen, Star, Clock } from "lucide-react";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
 
   /* ================= STATE ================= */
+  // ... (Keep ALL your existing state variables here exactly as they are)
   const [boards, setBoards] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -145,166 +147,153 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div className="space-y-10">
-
-      {/* ================= HEADER ================= */}
-      <section className="rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border border-blue-100">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Find Your Tutor
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Select board, class and subject to discover qualified tutors.
-        </p>
-      </section>
-
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 ">
+      
+      
       {/* ================= FILTER CARD ================= */}
-      <Card className="rounded-2xl shadow-sm border border-gray-100">
-        <h2 className="text-xl font-semibold mb-6">
-          Search Filters
-        </h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 -mt-12 relative z-20 mx-4 sm:mx-8">
+        <div className="flex items-center gap-2 mb-6 text-gray-800">
+          <Search className="w-5 h-5 text-indigo-600" />
+          <h2 className="text-lg font-bold">Search Parameters</h2>
+        </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           <Select
             label="Board"
             name="board_id"
             value={filters.board_id}
             onChange={handleChange}
-            options={boards.map((b) => ({
-              value: b.id,
-              label: b.board_name
-            }))}
-            placeholder="Select board"
+            options={boards.map((b) => ({ value: b.id, label: b.board_name }))}
+            placeholder="Select board..."
           />
-
           <Select
             label="Class"
             name="class_id"
             value={filters.class_id}
             onChange={handleChange}
-            options={classes.map((c) => ({
-              value: c.id,
-              label: c.class_name
-            }))}
+            options={classes.map((c) => ({ value: c.id, label: c.class_name }))}
             disabled={!filters.board_id}
-            placeholder="Select class"
+            placeholder="Select class..."
           />
-
           <Select
             label="Subject"
             name="subject_id"
             value={filters.subject_id}
             onChange={handleChange}
-            options={subjects.map((s) => ({
-              value: s.id,
-              label: s.subject_name
-            }))}
+            options={subjects.map((s) => ({ value: s.id, label: s.subject_name }))}
             disabled={!filters.class_id}
-            placeholder="Select subject"
+            placeholder="Select subject..."
           />
-
           <Select
             label="Chapters (Optional)"
             name="chapter_ids"
             value={filters.chapter_ids}
             onChange={(e) => {
-              const selected = Array.from(
-                e.target.selectedOptions,
-                option => option.value
-              );
-
-              setFilters(prev => ({
-                ...prev,
-                chapter_ids: selected
-              }));
+              const selected = Array.from(e.target.selectedOptions, option => option.value);
+              setFilters(prev => ({ ...prev, chapter_ids: selected }));
             }}
-            options={chapters.map((c) => ({
-              value: c.id,
-              label: c.chapter_name
-            }))}
+            options={chapters.map((c) => ({ value: c.id, label: c.chapter_name }))}
             disabled={!filters.subject_id}
             multiple
           />
-
         </div>
 
-        <div className="mt-6 flex gap-4">
-          <Button onClick={handleSearch} loading={loading}>
-            Find Tutors
-          </Button>
-
-          <Button
-            variant="secondary"
+        <div className="mt-8 flex flex-wrap gap-4 items-center justify-end border-t border-gray-100 pt-6">
+          <Button 
+            variant="secondary" 
             onClick={() => navigate("/student/sessions")}
+            className="text-gray-600 bg-gray-100 hover:bg-gray-200 border-none"
           >
+            <Clock className="w-4 h-4 mr-2 inline" />
             My Sessions
           </Button>
+          <Button 
+            onClick={handleSearch} 
+            loading={loading}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 shadow-md hover:shadow-lg transition-all"
+          >
+            Find Tutors
+          </Button>
         </div>
-      </Card>
+      </div>
 
       {/* ================= LOADING ================= */}
       {loading && (
-        <div className="flex justify-center py-10">
+        <div className="flex flex-col items-center justify-center py-20 text-indigo-600">
           <LoadingSpinner size="lg" />
+          <p className="mt-4 font-medium text-gray-500">Searching for the best tutors...</p>
         </div>
       )}
 
       {/* ================= RESULTS ================= */}
       {!loading && searched && (
-        <div>
-          <h2 className="text-2xl font-semibold mb-6">
-            {tutors.length > 0
-              ? "Available Tutors"
-              : "No Tutors Found"}
-          </h2>
+        <div className="animate-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {tutors.length > 0 ? "Available Experts" : "No Tutors Found"}
+            </h2>
+            {tutors.length > 0 && (
+              <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">
+                {tutors.length} Results
+              </span>
+            )}
+          </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tutors.map((tutor) => (
               <Card
                 key={tutor.user_id}
                 hover
-                onClick={() => handleTutorClick(tutor.user_id)}
-                className="cursor-pointer transition hover:shadow-lg"
+                className="group flex flex-col cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white border border-gray-100 overflow-hidden rounded-2xl p-0"
               >
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {tutor.first_name} {tutor.last_name}
-                </h3>
-
-                <p className="text-sm text-gray-600">
-                  {tutor.email}
-                </p>
-
-                <p className="mt-3 text-gray-700 line-clamp-3">
-                  {tutor.bio || "No bio available"}
-                </p>
-
-                <div className="mt-4 text-sm space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">
-                      Experience
-                    </span>
-                    <span className="font-medium">
-                      {tutor.experience_years} years
-                    </span>
+                <div className="p-6 flex-1">
+                  <div className="flex items-start gap-4">
+                    {/* Fake Avatar - Replace with tutor.profile_image if you have it */}
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-100 to-blue-50 flex items-center justify-center text-indigo-600 font-bold text-xl flex-shrink-0 ring-4 ring-white shadow-sm">
+                      {tutor.first_name[0]}{tutor.last_name[0]}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                        {tutor.first_name} {tutor.last_name}
+                      </h3>
+                      <p className="text-sm text-gray-500 font-medium">{tutor.email}</p>
+                    </div>
                   </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">
-                      Rate
-                    </span>
-                    <span className="font-medium text-blue-600">
-                      ₹{tutor.hourly_rate}/hour
-                    </span>
+                  <p className="mt-5 text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                    {tutor.bio || "This tutor hasn't added a bio yet, but they are ready to help you learn!"}
+                  </p>
+
+                  <div className="mt-6 grid grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Experience</p>
+                      <p className="font-bold text-gray-900 flex items-center gap-1">
+                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                        {tutor.experience_years} Years
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Hourly Rate</p>
+                      <p className="font-bold text-indigo-600">
+                        ₹{tutor.hourly_rate}/hr
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <Button
-                  variant="outline"
-                  fullWidth
-                  className="mt-4"
-                >
-                  View Profile
-                </Button>
+                <div className="p-4 bg-gray-50 border-t border-gray-100">
+                  <Button
+                    variant="outline"
+                    fullWidth
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent card click if they click the button directly
+                      handleTutorClick(tutor.user_id);
+                    }}
+                    className="border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-colors rounded-xl"
+                  >
+                    View Full Profile
+                  </Button>
+                </div>
               </Card>
             ))}
           </div>
