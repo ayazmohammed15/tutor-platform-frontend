@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
@@ -11,7 +12,7 @@ const TutorRegister = () => {
   const location = useLocation();
   const token = new URLSearchParams(location.search).get("token");
   const [loading, setLoading] = useState(false);
-
+const navigate = useNavigate();
 
   const [boardOptions, setBoardOptions] = useState([]);
   const [classOptions, setClassOptions] = useState([]);
@@ -127,7 +128,30 @@ const TutorRegister = () => {
         }
       );
 
-      toast.success("Registration submitted successfully! Await admin approval.");
+      toast.success("Registration submitted successfully!",{replace:true});
+
+// Clear form
+setFormData({
+  firstName: "",
+  lastName: "",
+  phone: "",
+  qualification: "",
+  university: "",
+  graduationYear: "",
+  experienceYears: "",
+  boardId: "",
+  classIds: [],
+  subjects: [],
+  teachingMode: "",
+  expectedFee: "",
+  about: "",
+  demoLink: "",
+  profilePhoto: null,
+  resume: null,
+});
+
+// Redirect to success page
+navigate("/tutor-registration-success");
 
     } catch (error) {
       toast.error(

@@ -17,7 +17,7 @@ const AdminDashboard = () => {
   const fetchPendingTutors = async () => {
     try {
       const response = await tutorService.getPendingTutors();
-      setPendingTutors(response.data.tutors || []);
+      setPendingTutors(response.tutors || []);
     } catch (error) {
       console.error('Error fetching pending tutors:', error);
       toast.error('Failed to load pending tutors');
@@ -25,7 +25,7 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
-
+  console.log('Pending Tutors:', pendingTutors);
   const handleApprove = async (tutorId) => {
     setProcessing(tutorId);
     try {
@@ -71,7 +71,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      
+
       {/* Header Title & Actions */}
       <div className="flex justify-between items-end">
         <div>
@@ -134,63 +134,104 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* TUTOR APPROVAL TABLE */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50/50">
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">Pending Tutor Approvals</h2>
-          </div>
+      {/* TUTOR APPROVAL SECTION */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Pending Tutor Applications
+          </h2>
           <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
             {pendingTutors.length} Pending
           </span>
         </div>
 
         {loading ? (
-          <div className="p-12 flex justify-center"><LoadingSpinner /></div>
+          <div className="p-12 flex justify-center">
+            <LoadingSpinner />
+          </div>
         ) : pendingTutors.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">No pending applications at this time.</div>
+          <div className="p-12 text-center text-gray-500">
+            No pending applications at this time.
+          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-white border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
-                  <th className="px-6 py-4 font-medium">Applicant Info</th>
-                  <th className="px-6 py-4 font-medium">Experience & Rate</th>
-                  <th className="px-6 py-4 font-medium">Subjects</th>
-                  <th className="px-6 py-4 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {pendingTutors.map((tutor) => (
-                  <tr key={tutor.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold">
-                          {tutor.first_name?.[0]}{tutor.last_name?.[0]}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{tutor.first_name} {tutor.last_name}</div>
-                          <div className="text-sm text-gray-500">{tutor.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 font-medium">₹{tutor.hourly_rate} / hr</div>
-                      <div className="text-sm text-gray-500">{tutor.experience_years} years exp.</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 mb-1">{tutor.subjects || 'Not specified'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="success" onClick={() => handleApprove(tutor.id)} loading={processing === tutor.id} className="!py-1.5 !px-3 text-xs">Approve</Button>
-                        <Button variant="danger" onClick={() => handleReject(tutor.id)} loading={processing === tutor.id} className="!py-1.5 !px-3 text-xs">Reject</Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-6 grid md:grid-cols-2 gap-6">
+            {pendingTutors.map((tutor) => (
+              <div
+                key={tutor.user_id}
+                className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition bg-white"
+              >
+                {/* Header */}
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src={`http://localhost:5000/uploads/${tutor.profile_image}`}
+                    alt="Profile"
+                    className="w-14 h-14 rounded-full object-cover border"
+                  />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {tutor.first_name} {tutor.last_name}
+                    </h3>
+                    <p className="text-sm text-gray-500">{tutor.email}</p>
+                  </div>
+                </div>
+
+                {/* Teaching Info */}
+                <div className="space-y-2 text-sm text-gray-700">
+                  <p><span className="font-medium">Board:</span> {tutor.board_name || "N/A"}</p>
+                  <p><span className="font-medium">Classes:</span> {tutor.classes || "N/A"}</p>
+                  <p><span className="font-medium">Subjects:</span> {tutor.subjects || "N/A"}</p>
+                  <p><span className="font-medium">Experience:</span> {tutor.experience_years} years</p>
+                  <p><span className="font-medium">Rate:</span> ₹{tutor.hourly_rate || "Not set"} / hr</p>
+                  <p><span className="font-medium">Teaching Mode:</span> {tutor.teaching_mode || "N/A"}</p>
+                </div>
+
+                {/* Education */}
+                <div className="mt-3 text-sm text-gray-600">
+                  <p className="font-medium text-gray-800">Education</p>
+                  <p>{tutor.education}</p>
+                </div>
+
+                {/* Bio */}
+                <div className="mt-3 text-sm text-gray-600">
+                  <p className="font-medium text-gray-800">About</p>
+                  <p className="line-clamp-3">{tutor.bio}</p>
+                </div>
+
+                {/* Resume */}
+                {tutor.resume && (
+                  <div className="mt-4">
+                    <a
+                      href={`http://localhost:5000/uploads/${tutor.resume}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 text-sm font-medium hover:underline"
+                    >
+                      View Resume →
+                    </a>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex justify-end gap-3 mt-6">
+                  <Button
+                    variant="success"
+                    onClick={() => handleApprove(tutor.user_id)}
+                    loading={processing === tutor.user_id}
+                    className="!px-4 !py-2 text-sm"
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleReject(tutor.user_id)}
+                    loading={processing === tutor.user_id}
+                    className="!px-4 !py-2 text-sm"
+                  >
+                    Reject
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -203,7 +244,7 @@ const AdminDashboard = () => {
               <h2 className="text-lg font-semibold text-gray-900">Invite New Tutor</h2>
               <button onClick={() => setShowInviteModal(false)} className="text-gray-400 hover:text-gray-600 transition">✕</button>
             </div>
-            
+
             <form onSubmit={handleSendInvite} className="p-6 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>

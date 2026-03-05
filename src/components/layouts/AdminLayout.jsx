@@ -31,7 +31,7 @@ const AdminLayout = () => {
 
   // 🔴 ADD THIS LOG HERE:
   console.log("DEBUG: Current User Object ->", user);
-  
+
   // Helper function to safely get user initials (e.g., John Doe -> JD)
   const getInitials = () => {
     if (user?.first_name && user?.last_name) {
@@ -45,10 +45,10 @@ const AdminLayout = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
-      
+
       {/* 1. SIDEBAR */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex-col hidden md:flex flex-shrink-0">
-        
+
         {/* BRAND HEADER - FIXED SPACING */}
         <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800 flex-shrink-0">
           <div className="bg-white/10 p-2 rounded-xl flex items-center justify-center">
@@ -63,28 +63,28 @@ const AdminLayout = () => {
             </p>
           </div>
         </div>
-        
+
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-3">
             {navItems.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
+                <li key={item.name}>
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
                     `block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive
                         ? "bg-blue-600 text-white"
                         : "hover:bg-slate-800 hover:text-white"
-                    }`
-                  }
-                >
-                  {item.name}
-                </NavLink>
-              </li>
+                      }`
+                    }
+                  >
+                    {item.name}
+                  </NavLink>
+                </li>
             ))}
           </ul>
         </nav>
-        
+
         {/* Sidebar Bottom Profile Widget */}
         <div className="p-4 border-t border-slate-800 flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -102,10 +102,10 @@ const AdminLayout = () => {
 
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        
+
         {/* 2. TOP HEADER */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0 z-10">
-          
+
           {/* Global Search */}
           <div className="flex items-center flex-1">
             <div className="relative w-full max-w-md">
@@ -119,7 +119,7 @@ const AdminLayout = () => {
               />
             </div>
           </div>
-          
+
           {/* Header Actions (Notifications & Profile Menu) */}
           <div className="flex items-center space-x-6">
             <button className="text-gray-400 hover:text-gray-600 relative transition-colors">
@@ -130,7 +130,7 @@ const AdminLayout = () => {
             {/* Profile Dropdown Container */}
             <div className="relative">
               {/* Profile Avatar Button */}
-              <button 
+              <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center focus:outline-none"
               >
@@ -143,11 +143,11 @@ const AdminLayout = () => {
               {isProfileOpen && (
                 <>
                   {/* Invisible Overlay: Closes menu if user clicks outside */}
-                  <div 
-                    className="fixed inset-0 z-10" 
+                  <div
+                    className="fixed inset-0 z-10"
                     onClick={() => setIsProfileOpen(false)}
                   ></div>
-                  
+
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-20 transform transition-all">
                     <div className="px-4 py-3 border-b border-gray-50">
                       <p className="text-xs text-gray-500 font-medium">Signed in as</p>
@@ -155,12 +155,12 @@ const AdminLayout = () => {
                         {user?.email || 'admin@TutorBook.com'}
                       </p>
                     </div>
-                    
+
                     <div className="py-1">
                       <button
                         onClick={() => {
                           setIsProfileOpen(false);
-                          logout(); 
+                          logout();
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium flex items-center"
                       >
@@ -179,7 +179,7 @@ const AdminLayout = () => {
         <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-50">
           <Outlet />
         </main>
-        
+
       </div>
     </div>
   );

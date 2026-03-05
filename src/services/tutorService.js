@@ -34,31 +34,40 @@ export const tutorService = {
     return response.data;
   },
 
-  getPendingTutors: async () => {
-    const response = await api.get('/tutors/pending');
-    return response.data;
-  },
-
-  approveTutor: async (tutorId) => {
-    const response = await api.put(`/tutors/${tutorId}/approve`);
-    return response.data;
-  },
-
-  rejectTutor: async (tutorId) => {
-    const response = await api.put(`/tutors/${tutorId}/reject`);
-    return response.data;
-  },
-
-  sendRegistrationInvite: (data) =>
-    api.post("/admin/send-tutor-invite", data),
-
-  getPendingTutors: () =>
-    api.get("/admin/pending-tutors"),
+  getTutorsByStatus: (status) =>
+    api.get(`/admin/tutors/status/${status}`),
 
   approveTutor: (id) =>
     api.put(`/admin/approve/${id}`),
 
   rejectTutor: (id) =>
-    api.put(`/admin/reject/${id}`)
+    api.put(`/admin/reject/${id}`),
+
+  // approveTutor: async (tutorId) => {
+  //   const response = await api.put(`/tutors/${tutorId}/approve`);
+  //   return response.data;
+  // },
+
+  // rejectTutor: async (tutorId) => {
+  //   const response = await api.put(`/tutors/${tutorId}/reject`);
+  //   return response.data;
+  // },
+
+  sendRegistrationInvite: (data) =>
+    api.post("/admin/send-tutor-invite", data),
+
+  getStudents: async () => {
+  const res = await api.get("/admin/students");
+  return res.data;
+}
+
+  // getPendingTutors: () =>
+  //   api.get("/admin/pending-tutors"),
+
+  // approveTutor: (id) =>
+  //   api.put(`/admin/approve/${id}`),
+
+  // rejectTutor: (id) =>
+  //   api.put(`/admin/reject/${id}`)
 
 };

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate,Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -29,6 +29,7 @@ import TutorSessions from './pages/tutor/TutorSessions';
 import TutorAssignments from './pages/tutor/TutorAssignments';
 import TutorPayments from './pages/tutor/TutorPayments';
 import TutorAvailability from './pages/tutor/TutorAvailability';
+import TutorRegistrationSuccess from "./components/common/TutorRegistrationSuccess";
 
 function App() {
   return (
@@ -77,21 +78,21 @@ function App() {
           >
             {/* If user goes to /student, redirect to dashboard */}
             <Route index element={<Navigate to="dashboard" replace />} />
-            
+
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="tutor/:tutorId" element={<TutorProfile />} />
             <Route path="sessions" element={<StudentSessions />} />
-            <Route 
-              path="profile" 
-              element={<RolePlaceholder title="My Profile" description="Student profile details will appear here." />} 
+            <Route
+              path="profile"
+              element={<RolePlaceholder title="My Profile" description="Student profile details will appear here." />}
             />
-            <Route 
-              path="assignments" 
-              element={<RolePlaceholder title="Assignments" description="Student assignments will appear here." />} 
+            <Route
+              path="assignments"
+              element={<RolePlaceholder title="Assignments" description="Student assignments will appear here." />}
             />
-            <Route 
-              path="payments" 
-              element={<RolePlaceholder title="Payments" description="Student payment history will appear here." />} 
+            <Route
+              path="payments"
+              element={<RolePlaceholder title="Payments" description="Student payment history will appear here." />}
             />
           </Route>
 
@@ -108,13 +109,13 @@ function App() {
           >
             <Route path="dashboard" element={<TutorDashboard />} />
             <Route path="sessions" element={<TutorSessions />} />
-            <Route path='availability' element={<TutorAvailability />}/>
+            <Route path='availability' element={<TutorAvailability />} />
             <Route path="assignments" element={<TutorAssignments />} />
             <Route path="payments" element={<TutorPayments />} />
             <Route path="profile" element={<TutorsProfile />} />
           </Route>
 
-         {/* ================= ADMIN ROUTES ================= */}
+          {/* ================= ADMIN ROUTES ================= */}
           <Route
             path="/admin"
             element={
@@ -123,23 +124,27 @@ function App() {
               </ProtectedRoute>
             }
           >
-            {/* The Dashboard is the default index */}
+            {/* Default redirect */}
+            <Route index element={<Navigate to="dashboard" replace />} />
+
             <Route path="dashboard" element={<AdminDashboard />} />
-            
-            {/* The new scaffolded pages */}
-            <Route path="students" element={<AdminStudents />} />
             <Route path="tutors" element={<AdminTutors />} />
+            {/* Other sections */}
+            <Route path="students" element={<AdminStudents />} />
             <Route path="subjects" element={<AdminSubjects />} />
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="payments" element={<AdminPayments />} />
           </Route>
-<Route path="/set-password" element={<SetPassword />} />
+          <Route path="/set-password" element={<SetPassword />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
-<Route path="/tutor-register" element={<TutorRegister />} />
-      
-          
+          <Route path="/tutor-register" element={<TutorRegister />} />
+
+          <Route
+            path="/tutor-registration-success"
+            element={<TutorRegistrationSuccess />}
+          />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
