@@ -12,13 +12,33 @@ const TutorRegister = () => {
   const location = useLocation();
   const token = new URLSearchParams(location.search).get("token");
   const [loading, setLoading] = useState(false);
-const navigate = useNavigate();
-
+  const navigate = useNavigate();
+  const [courseOptions, setCourseOptions] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [boardOptions, setBoardOptions] = useState([]);
   const [classOptions, setClassOptions] = useState([]);
   const [subjectOptions, setSubjectOptions] = useState([]);
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await boardService.getCourses();
 
+        const formatted = data.map((c) => ({
+          value: c.id,
+          label: c.course_name
+        }));
+
+        setCourseOptions(formatted);
+
+      } catch (error) {
+        console.error("Courses Load Error:", error);
+        toast.error("Failed to load courses");
+      }
+    };
+
+    fetchCourses();
+  }, []);
   useEffect(() => {
     const fetchBoards = async () => {
       try {
@@ -58,6 +78,7 @@ const navigate = useNavigate();
     university: "",
     graduationYear: "",
     experienceYears: "",
+    courseId: "",
     boardId: "",
     classIds: [],
     subjects: [],
@@ -104,6 +125,7 @@ const navigate = useNavigate();
       data.append("university", formData.university);
       data.append("graduationYear", formData.graduationYear);
       data.append("experienceYears", formData.experienceYears);
+      data.append("courseId", formData.courseId);
       data.append("boardId", formData.boardId);
       data.append("classIds", JSON.stringify(formData.classIds));
       data.append("teachingMode", formData.teachingMode);
@@ -128,30 +150,30 @@ const navigate = useNavigate();
         }
       );
 
-      toast.success("Registration submitted successfully!",{replace:true});
+      toast.success("Registration submitted successfully!", { replace: true });
 
-// Clear form
-setFormData({
-  firstName: "",
-  lastName: "",
-  phone: "",
-  qualification: "",
-  university: "",
-  graduationYear: "",
-  experienceYears: "",
-  boardId: "",
-  classIds: [],
-  subjects: [],
-  teachingMode: "",
-  expectedFee: "",
-  about: "",
-  demoLink: "",
-  profilePhoto: null,
-  resume: null,
-});
+      // Clear form
+      setFormData({
+        firstName: "",
+        lastName: "",
+        phone: "",
+        qualification: "",
+        university: "",
+        graduationYear: "",
+        experienceYears: "",
+        boardId: "",
+        classIds: [],
+        subjects: [],
+        teachingMode: "",
+        expectedFee: "",
+        about: "",
+        demoLink: "",
+        profilePhoto: null,
+        resume: null,
+      });
 
-// Redirect to success page
-navigate("/tutor-registration-success");
+      // Redirect to success page
+      navigate("/tutor-registration-success");
 
     } catch (error) {
       toast.error(
@@ -217,7 +239,26 @@ navigate("/tutor-registration-success");
           {/* STEP 3 */}
           {step === 3 && (
             <div className="space-y-5">
+              {/* COURSE */}
+              <Select
+                options={courseOptions}
+                placeholder="Select Course"
+                value={selectedCourse}
+                onChange={(opt) => {
+                  setSelectedCourse(opt);
 
+                  setFormData((prev) => ({
+                    ...prev,
+                    courseId: opt.value,
+                    boardId: "",
+                    classIds: [],
+                    subjects: []
+                  }));
+
+                  setClassOptions([]);
+                  setSubjectOptions([]);
+                }}
+              />
               {/* BOARD */}
               <Select
                 options={boardOptions}

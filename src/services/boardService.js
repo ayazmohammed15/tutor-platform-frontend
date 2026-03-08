@@ -1,19 +1,23 @@
 import api from './api';
 
 export const boardService = {
+  getCourses: async () => {
+    const response = await api.get("/courses");
+    return response.data;
+  },
   getBoards: async () => {
     const response = await api.get('/boards');
     return response.data;
   },
 
   getClassesByBoard: async (boardId) => {
-    const response = await api.get(`/boards/classes?boardId=${boardId}`);
+    const response = await api.get(`/classes?boardId=${boardId}`);
     return response.data;
   },
 
   getSubjectsByClasses: async (boardId, classIds) => {
     const response = await api.post(
-      `/boards/subjects`,
+      `/subjects`,
       {
         boardId,
         classIds
@@ -23,7 +27,7 @@ export const boardService = {
   },
   getChaptersBySubject: async (subjectId) => {
     const response = await api.get(
-      `/boards/chapters?subjectId=${subjectId}`
+      `/chapters?subjectId=${subjectId}`
     );
     return response.data;
   },

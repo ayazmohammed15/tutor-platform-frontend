@@ -1,158 +1,413 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
-import Card from '../../components/common/Card';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+import toast from "react-hot-toast";
+import { boardService } from "../../services/boardService";
+import { useAuth } from "../../context/AuthContext";
+import Input from "../../components/common/Input";
+import Button from "../../components/common/Button";
+import Card from "../../components/common/Card";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-  });
 
-  const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /* ---------------------------
+     DROPDOWN OPTIONS
+  --------------------------- */
 
-    // ✅ Password Match Validation
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
+  const [courseOptions, setCourseOptions] = useState([]);
+  const [boardOptions, setBoardOptions] = useState([]);
+  const [classOptions, setClassOptions] = useState([]);
+  const [subjectOptions, setSubjectOptions] = useState([]);
 
-    setLoading(true);
+  /* ---------------------------
+     FORM DATA
+  --------------------------- */
+
+  const [formData, setFormData] = useState({
+
+    course_id: "",
+    board_id: "",
+    class_id: "",
+    subject_id: "",
+
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: ""
+
+  });
+
+  /* ---------------------------
+     LOAD COURSES
+  --------------------------- */
+
+  useEffect(() => {
+
+    const fetchCourses = async () => {
+
+      try {
+
+        const data = await boardService.getCourses();
+
+        const formatted = data.map(c => ({
+          value: c.id,
+          label: c.course_name
+        }));
+
+        setCourseOptions(formatted);
+
+      } catch (error) {
+
+        toast.error("Failed to load courses");
+
+      }
+
+    };
+
+    fetchCourses();
+
+  }, []);
+
+
+  /* ---------------------------
+     LOAD BOARDS
+  --------------------------- */
+
+  useEffect(() => {
+
+    const fetchBoards = async () => {
+
+      try {
+
+        const data = await boardService.getBoards();
+
+        const formatted = data.map(b => ({
+          value: b.id,
+          label: b.board_name
+        }));
+
+        setBoardOptions(formatted);
+
+      } catch (error) {
+
+        toast.error("Failed to load boards");
+
+      }
+
+    };
+
+    fetchBoards();
+
+  }, []);
+
+
+  /* ---------------------------
+     HANDLERS
+  --------------------------- */
+
+  const handleBoardChange = async (opt) => {
+
+    setFormData(prev => ({
+
+      ...prev,
+      board_id: opt.value,
+      class_id: "",
+      subject_id: ""
+
+    }));
 
     try {
+
+      const data = await boardService.getClassesByBoard(opt.value);
+
+      const formatted = data.map(c => ({
+
+        value: c.id,
+        label: c.class_name
+
+      }));
+
+      setClassOptions(formatted);
+      setSubjectOptions([]);
+
+    } catch (error) {
+
+      toast.error("Failed to load classes");
+
+    }
+
+  };
+
+
+  const handleClassChange = async (opt) => {
+
+    setFormData(prev => ({
+
+      ...prev,
+      class_id: opt.value,
+      subject_id: ""
+
+    }));
+
+    try {
+
+      const data = await boardService.getSubjectsByClasses(
+        formData.board_id,
+        [opt.value]
+      );
+
+      const formatted = data.map(s => ({
+
+        value: s.id,
+        label: s.subject_name
+
+      }));
+
+      setSubjectOptions(formatted);
+
+    } catch (error) {
+
+      toast.error("Failed to load subjects");
+
+    }
+
+  };
+
+
+  /* ---------------------------
+     STEP VALIDATION
+  --------------------------- */
+
+  const nextStep = () => {
+
+    if (
+      !formData.course_id ||
+      !formData.board_id ||
+      !formData.class_id ||
+      !formData.subject_id
+    ) {
+
+      toast.error("Please select course, board, class and subject");
+      return;
+
+    }
+
+    setStep(2);
+
+  };
+
+
+  /* ---------------------------
+     SUBMIT
+  --------------------------- */
+
+  const handleSubmit = async (e) => {
+
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+
+      toast.error("Passwords do not match");
+      return;
+
+    }
+
+    try {
+
+      setLoading(true);
+
       const response = await register({
+
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         password: formData.password,
+
+        course_id: formData.course_id,
+        board_id: formData.board_id,
+        class_id: formData.class_id,
+        subject_id: formData.subject_id
+
       });
 
       if (response.success) {
-        toast.success("Registration successful! Please login to continue.");
-        navigate('/login', { state: { email: formData.email } });
+
+        toast.success("Registration successful!");
+        navigate("/login");
+
       }
 
     } catch (error) {
-      console.error("Registration error:", error);
+
       toast.error("Registration failed");
-    } finally {
-      setLoading(false);
+
     }
+    finally {
+
+      setLoading(false);
+
+    }
+
   };
 
+
+
   return (
+
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
+
       <Card className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-          <p className="text-gray-600 mt-2">
-            You are registering as <span className="font-semibold text-blue-600">Student</span>
-          </p>
-        </div>
 
-        <form onSubmit={handleSubmit}>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Student Registration
+        </h2>
 
-          <Input
-            label="First Name"
-            type="text"
-            name="first_name"
-            value={formData.first_name}
-            onChange={handleChange}
-            placeholder="Enter your first name"
-            required
-          />
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-          <Input
-            label="Last Name"
-            type="text"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            placeholder="Enter your last name"
-            required
-          />
 
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-            required
-          />
+          {/* STEP 1 */}
 
-          <Input
-            label="Mobile Number"
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="Enter your mobile number"
-            required
-          />
+          {step === 1 && (
 
-          <Input
-            label="Password"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Create a password"
-            required
-          />
+            <>
 
-          <Input
-            label="Confirm Password"
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            placeholder="Confirm your password"
-            required
-          />
+              <Select
+                options={courseOptions}
+                placeholder="Select Course"
+                onChange={(opt) => {
 
-          <Button type="submit" loading={loading} fullWidth className="mt-6">
-            Register
-          </Button>
+                  setFormData(prev => ({
+
+                    ...prev,
+                    course_id: opt.value
+
+                  }));
+
+                }}
+              />
+
+              <Select
+                options={boardOptions}
+                placeholder="Select Board"
+                onChange={handleBoardChange}
+              />
+
+              <Select
+                options={classOptions}
+                placeholder="Select Class"
+                onChange={handleClassChange}
+              />
+
+              <Select
+                options={subjectOptions}
+                placeholder="Select Subject"
+                onChange={(opt) => {
+
+                  setFormData(prev => ({
+
+                    ...prev,
+                    subject_id: opt.value
+
+                  }));
+
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={nextStep}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg"
+              >
+                Next
+              </button>
+
+            </>
+
+          )}
+
+
+
+          {/* STEP 2 */}
+
+          {step === 2 && (
+
+            <>
+
+              <Input label="First Name"
+                name="first_name"
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              />
+
+              <Input label="Last Name"
+                name="last_name"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              />
+
+              <Input label="Email"
+                name="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+
+              <Input label="Phone"
+                name="phone"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+
+              <Input label="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+
+              <Input label="Confirm Password"
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              />
+
+              <div className="flex justify-between">
+
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="px-4 py-2 bg-gray-300 rounded"
+                >
+                  Back
+                </button>
+
+                <Button type="submit" loading={loading}>
+                  Register
+                </Button>
+
+              </div>
+
+            </>
+
+          )}
 
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Sign in here
-            </Link>
-          </p>
-        </div>
-
       </Card>
+
     </div>
+
   );
+
 };
 
 export default Register;

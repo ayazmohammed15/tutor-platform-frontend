@@ -16,11 +16,11 @@ const AdminDashboard = () => {
 
   const fetchPendingTutors = async () => {
     try {
-      const response = await tutorService.getPendingTutors();
-      setPendingTutors(response.tutors || []);
+      const response = await tutorService.getTutorsByStatus("pending");
+      setPendingTutors(response.data.tutors || []);
     } catch (error) {
-      console.error('Error fetching pending tutors:', error);
-      toast.error('Failed to load pending tutors');
+      console.error("Error fetching pending tutors:", error);
+      toast.error("Failed to load pending tutors");
     } finally {
       setLoading(false);
     }

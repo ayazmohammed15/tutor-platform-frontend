@@ -8,18 +8,22 @@ import Select from "../../components/common/Select";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import toast from "react-hot-toast";
 import { Search, BookOpen, Star, Clock } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   /* ================= STATE ================= */
   // ... (Keep ALL your existing state variables here exactly as they are)
+  const [courses, setCourses] = useState([]);
   const [boards, setBoards] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [chapters, setChapters] = useState([]);
 
   const [filters, setFilters] = useState({
+    course_id: "",
     board_id: "",
     class_id: "",
     subject_id: "",
@@ -30,6 +34,36 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+
+    setFilters((prev) => ({
+      ...prev,
+      course_id: user.course_id || "",
+      board_id: user.board_id || "",
+      class_id: user.class_id || "",
+      subject_id: user.subject_id || ""
+    }));
+  }, [user]);
+
+  useEffect(() => {
+    if (filters.course_id && filters.subject_id) {
+      handleSearch();
+    }
+  }, [filters.course_id, filters.subject_id]);
+
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        const data = await boardService.getCourses();
+        setCourses(data);
+      } catch (err) {
+        toast.error("Failed to load courses");
+      }
+    };
+
+    loadCourses();
+  }, []);
   /* ================= LOAD BOARDS ================= */
   useEffect(() => {
     const loadBoards = async () => {
@@ -102,19 +136,30 @@ const StudentDashboard = () => {
     setFilters((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "course_id" && {
+        board_id: "",
+        class_id: "",
+        subject_id: "",
+        chapter_ids: []
+      }),
       ...(name === "board_id" && {
         class_id: "",
-        subject_id: ""
+        subject_id: "",
+        chapter_ids: []
       }),
       ...(name === "class_id" && {
-        subject_id: ""
+        subject_id: "",
+        chapter_ids: []
+      }),
+      ...(name === "subject_id" && {
+        chapter_ids: []
       })
     }));
   };
 
   /* ================= SEARCH TUTORS ================= */
   const handleSearch = async () => {
-    if (!filters.subject_id) {
+    if (!filters.course_id || !filters.subject_id) {
       toast.error("Please select Board, Class and Subject");
       return;
     }
@@ -124,14 +169,18 @@ const StudentDashboard = () => {
 
     try {
       const res = await tutorService.searchTutors(filters);
-      setTutors(res.data.tutors);
+      const payload = res?.data?.data ?? res?.data ?? res ?? {};
+      const tutorsList = Array.isArray(payload?.tutors) ? payload.tutors : [];
+      console.log("Tutors response:", payload);
+      setTutors(tutorsList);
 
-      if (res.data.tutors.length === 0) {
+      if (tutorsList.length === 0) {
         toast.info("No tutors found for selected subject");
       } else {
-        toast.success(`Found ${res.data.tutors.length} tutor(s)`);
+        toast.success(`Found ${tutorsList.length} tutor(s)`);
       }
     } catch (err) {
+      console.error("Tutor search failed:", err);
       toast.error("Something went wrong while searching");
     } finally {
       setLoading(false);
@@ -140,16 +189,19 @@ const StudentDashboard = () => {
 
   const handleTutorClick = (id) => {
     navigate(`/student/tutor/${id}`, {
-      state: { subject_id: filters.subject_id,
+      state: {
+        subject_id: filters.subject_id,
         chapter_ids: filters.chapter_ids
-       }
+      }
     });
   };
 
+  const tutorResults = Array.isArray(tutors) ? tutors : [];
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 ">
-      
-      
+
+
       {/* ================= FILTER CARD ================= */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 -mt-12 relative z-20 mx-4 sm:mx-8">
         <div className="flex items-center gap-2 mb-6 text-gray-800">
@@ -157,7 +209,18 @@ const StudentDashboard = () => {
           <h2 className="text-lg font-bold">Search Parameters</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+          <Select
+            label="Course"
+            name="course_id"
+            value={filters.course_id}
+            onChange={handleChange}
+            options={courses.map((c) => ({
+              value: c.id,
+              label: c.course_name
+            }))}
+            placeholder="Select course..."
+          />
           <Select
             label="Board"
             name="board_id"
@@ -187,28 +250,32 @@ const StudentDashboard = () => {
           <Select
             label="Chapters (Optional)"
             name="chapter_ids"
-            value={filters.chapter_ids}
+            value={filters.chapter_ids?.[0] || ""}
             onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, option => option.value);
-              setFilters(prev => ({ ...prev, chapter_ids: selected }));
+              const selectedChapterId = e.target.value;
+              setFilters((prev) => ({
+                ...prev,
+                chapter_ids: selectedChapterId ? [selectedChapterId] : []
+              }));
             }}
             options={chapters.map((c) => ({ value: c.id, label: c.chapter_name }))}
             disabled={!filters.subject_id}
-            multiple
           />
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4 items-center justify-end border-t border-gray-100 pt-6">
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
+            type="button"
             onClick={() => navigate("/student/sessions")}
             className="text-gray-600 bg-gray-100 hover:bg-gray-200 border-none"
           >
             <Clock className="w-4 h-4 mr-2 inline" />
             My Sessions
           </Button>
-          <Button 
-            onClick={handleSearch} 
+          <Button
+            type="button"
+            onClick={handleSearch}
             loading={loading}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 shadow-md hover:shadow-lg transition-all"
           >
@@ -230,17 +297,17 @@ const StudentDashboard = () => {
         <div className="animate-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              {tutors.length > 0 ? "Available Experts" : "No Tutors Found"}
+              {tutorResults.length > 0 ? "Available Experts" : "No Tutors Found"}
             </h2>
-            {tutors.length > 0 && (
+            {tutorResults.length > 0 && (
               <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">
-                {tutors.length} Results
+                {tutorResults.length} Results
               </span>
             )}
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tutors.map((tutor) => (
+            {tutorResults.map((tutor) => (
               <Card
                 key={tutor.user_id}
                 hover
@@ -250,13 +317,14 @@ const StudentDashboard = () => {
                   <div className="flex items-start gap-4">
                     {/* Fake Avatar - Replace with tutor.profile_image if you have it */}
                     <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-100 to-blue-50 flex items-center justify-center text-indigo-600 font-bold text-xl flex-shrink-0 ring-4 ring-white shadow-sm">
-                      {tutor.first_name[0]}{tutor.last_name[0]}
+                      {(tutor?.first_name?.[0] || "")}
+                      {(tutor?.last_name?.[0] || "")}
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                        {tutor.first_name} {tutor.last_name}
+                        {tutor?.first_name || ""} {tutor?.last_name || ""}
                       </h3>
-                      <p className="text-sm text-gray-500 font-medium">{tutor.email}</p>
+                      <p className="text-sm text-gray-500 font-medium">{tutor?.email || ""}</p>
                     </div>
                   </div>
 
