@@ -1,265 +1,185 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Select from "react-select";
-import toast from "react-hot-toast";
-import { boardService } from "../../services/boardService";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+  fetchCourses,
+  fetchBoards,
+  fetchClasses,
+  fetchSubjects
+} from "../../features/register/registerSlice";
+
 import { useAuth } from "../../context/AuthContext";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import toast from "react-hot-toast";
 
 const Register = () => {
 
-  const { register } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { register } = useAuth();
 
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  /* ---------------------------
-     DROPDOWN OPTIONS
-  --------------------------- */
-
-  const [courseOptions, setCourseOptions] = useState([]);
-  const [boardOptions, setBoardOptions] = useState([]);
-  const [classOptions, setClassOptions] = useState([]);
-  const [subjectOptions, setSubjectOptions] = useState([]);
-
-  /* ---------------------------
-     FORM DATA
-  --------------------------- */
+  const {
+    courses,
+    boards,
+    classes,
+    subjects
+  } = useSelector((state) => state.register);
 
   const [formData, setFormData] = useState({
-
-    course_id: "",
-    board_id: "",
-    class_id: "",
-    subject_id: "",
-
     first_name: "",
     last_name: "",
     email: "",
     phone: "",
     password: "",
-    confirmPassword: ""
-
+    confirmPassword: "",
   });
 
-  /* ---------------------------
-     LOAD COURSES
-  --------------------------- */
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [selectedBoard, setSelectedBoard] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [selectedSubjects, setSelectedSubjects] = useState([]);
+
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  const coursePrices = {
+    "school-tuition": 2000,
+    "iit-jee": 5000,
+    "neet": 4500,
+    "foundation": 3000,
+  };
 
   useEffect(() => {
+    dispatch(fetchCourses());
+    dispatch(fetchBoards());
+  }, [dispatch]);
 
-    const fetchCourses = async () => {
-
-      try {
-
-        const data = await boardService.getCourses();
-
-        const formatted = data.map(c => ({
-          value: c.id,
-          label: c.course_name
-        }));
-
-        setCourseOptions(formatted);
-
-      } catch (error) {
-
-        toast.error("Failed to load courses");
-
-      }
-
-    };
-
-    fetchCourses();
-
-  }, []);
-
-
-  /* ---------------------------
-     LOAD BOARDS
-  --------------------------- */
-
-  useEffect(() => {
-
-    const fetchBoards = async () => {
-
-      try {
-
-        const data = await boardService.getBoards();
-
-        const formatted = data.map(b => ({
-          value: b.id,
-          label: b.board_name
-        }));
-
-        setBoardOptions(formatted);
-
-      } catch (error) {
-
-        toast.error("Failed to load boards");
-
-      }
-
-    };
-
-    fetchBoards();
-
-  }, []);
-
-
-  /* ---------------------------
-     HANDLERS
-  --------------------------- */
-
-  const handleBoardChange = async (opt) => {
-
-    setFormData(prev => ({
-
-      ...prev,
-      board_id: opt.value,
-      class_id: "",
-      subject_id: ""
-
-    }));
-
-    try {
-
-      const data = await boardService.getClassesByBoard(opt.value);
-
-      const formatted = data.map(c => ({
-
-        value: c.id,
-        label: c.class_name
-
-      }));
-
-      setClassOptions(formatted);
-      setSubjectOptions([]);
-
-    } catch (error) {
-
-      toast.error("Failed to load classes");
-
-    }
-
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
+  const handleCourseChange = (course) => {
 
-  const handleClassChange = async (opt) => {
+    let updatedCourses;
 
-    setFormData(prev => ({
-
-      ...prev,
-      class_id: opt.value,
-      subject_id: ""
-
-    }));
-
-    try {
-
-      const data = await boardService.getSubjectsByClasses(
-        formData.board_id,
-        [opt.value]
-      );
-
-      const formatted = data.map(s => ({
-
-        value: s.id,
-        label: s.subject_name
-
-      }));
-
-      setSubjectOptions(formatted);
-
-    } catch (error) {
-
-      toast.error("Failed to load subjects");
-
+    if (selectedCourses.includes(course.slug)) {
+      updatedCourses = selectedCourses.filter((c) => c !== course.slug);
+    } else {
+      updatedCourses = [...selectedCourses, course.slug];
     }
 
+    setSelectedCourses(updatedCourses);
+
+    const price = updatedCourses.reduce(
+      (sum, slug) => sum + (coursePrices[slug] || 0),
+      0
+    );
+
+    setTotalPrice(price);
   };
 
+  const handleBoardChange = (boardId) => {
 
-  /* ---------------------------
-     STEP VALIDATION
-  --------------------------- */
+    const id = Number(boardId);
 
-  const nextStep = () => {
+    setSelectedBoard(id);
+    setSelectedClass(null);
+    setSelectedSubjects([]);
 
-    if (
-      !formData.course_id ||
-      !formData.board_id ||
-      !formData.class_id ||
-      !formData.subject_id
-    ) {
+    if (id) {
+      dispatch(fetchClasses(id));
+    }
+  };
 
-      toast.error("Please select course, board, class and subject");
-      return;
+  const handleClassChange = (classId) => {
 
+    const id = Number(classId);
+
+    setSelectedClass(id);
+    setSelectedSubjects([]);
+
+    if (!id) return;
+
+    dispatch(
+      fetchSubjects({
+        boardId: selectedBoard,
+        classIds: [id],
+      })
+    );
+  };
+
+  const handleSubjectChange = (subjectId) => {
+
+    let updated;
+
+    if (selectedSubjects.includes(subjectId)) {
+      updated = selectedSubjects.filter((id) => id !== subjectId);
+    } else {
+      updated = [...selectedSubjects, subjectId];
     }
 
-    setStep(2);
-
+    setSelectedSubjects(updated);
   };
-
-
-  /* ---------------------------
-     SUBMIT
-  --------------------------- */
 
   const handleSubmit = async (e) => {
 
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-
       toast.error("Passwords do not match");
       return;
-
     }
+
+    if (!selectedClass) {
+      toast.error("Please select class");
+      return;
+    }
+
+    if (selectedSubjects.length === 0) {
+      toast.error("Please select subjects");
+      return;
+    }
+
+    setLoading(true);
 
     try {
 
-      setLoading(true);
-
       const response = await register({
-
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         password: formData.password,
-
-        course_id: formData.course_id,
-        board_id: formData.board_id,
-        class_id: formData.class_id,
-        subject_id: formData.subject_id
-
+        courses: selectedCourses,
+        board_id: selectedBoard,
+        class_id: selectedClass,
+        subjects: selectedSubjects,
+        total_price: totalPrice
       });
 
       if (response.success) {
-
         toast.success("Registration successful!");
         navigate("/login");
-
       }
 
     } catch (error) {
 
+      console.error(error);
       toast.error("Registration failed");
 
-    }
-    finally {
+    } finally {
 
       setLoading(false);
 
     }
-
   };
-
-
 
   return (
 
@@ -267,140 +187,143 @@ const Register = () => {
 
       <Card className="w-full max-w-md">
 
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Student Registration
-        </h2>
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
+          <p className="text-gray-600 mt-2">
+            Register as <span className="font-semibold text-blue-600">Student</span>
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
 
+          <Input label="First Name" name="first_name" value={formData.first_name} onChange={handleChange} required />
+          <Input label="Last Name" name="last_name" value={formData.last_name} onChange={handleChange} required />
+          <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} required />
+          <Input label="Mobile Number" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+          <Input label="Password" type="password" name="password" value={formData.password} onChange={handleChange} required />
+          <Input label="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
 
-          {/* STEP 1 */}
+          {/* COURSES */}
 
-          {step === 1 && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-2">
+              Select Courses
+            </label>
 
-            <>
+            {courses?.map((course) => (
+              <div key={course.id} className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  checked={selectedCourses.includes(course.slug)}
+                  onChange={() => handleCourseChange(course)}
+                  className="mr-2"
+                />
+                <span>
+                  {course.course_name}
+                  {coursePrices[course.slug]
+                    ? ` - ₹${coursePrices[course.slug]}`
+                    : ""}
+                </span>
+              </div>
+            ))}
+          </div>
 
-              <Select
-                options={courseOptions}
-                placeholder="Select Course"
-                onChange={(opt) => {
+          {/* BOARD */}
 
-                  setFormData(prev => ({
+          <div className="mt-4">
 
-                    ...prev,
-                    course_id: opt.value
+            <label className="block text-sm font-medium mb-2">
+              Select Board (Optional)
+            </label>
 
-                  }));
+            <select
+              onChange={(e) => handleBoardChange(e.target.value)}
+              className="w-full border rounded p-2"
+            >
 
-                }}
-              />
+              <option value="">Select Board</option>
 
-              <Select
-                options={boardOptions}
-                placeholder="Select Board"
-                onChange={handleBoardChange}
-              />
+              {boards?.map((board) => (
+                <option key={board.id} value={board.id}>
+                  {board.board_name}
+                </option>
+              ))}
 
-              <Select
-                options={classOptions}
-                placeholder="Select Class"
-                onChange={handleClassChange}
-              />
+            </select>
 
-              <Select
-                options={subjectOptions}
-                placeholder="Select Subject"
-                onChange={(opt) => {
+          </div>
 
-                  setFormData(prev => ({
+          {/* CLASS */}
 
-                    ...prev,
-                    subject_id: opt.value
+          <div className="mt-4">
 
-                  }));
+            <label className="block text-sm font-medium mb-2">
+              Select Class
+            </label>
 
-                }}
-              />
+            <select
+              onChange={(e) => handleClassChange(e.target.value)}
+              className="w-full border rounded p-2"
+              disabled={!selectedBoard}
+            >
 
-              <button
-                type="button"
-                onClick={nextStep}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg"
-              >
-                Next
-              </button>
+              <option value="">Select Class</option>
 
-            </>
+              {classes?.map((cls) => (
+                <option key={cls.id} value={cls.id}>
+                  {cls.class_name}
+                </option>
+              ))}
 
-          )}
+            </select>
 
+          </div>
 
+          {/* SUBJECTS */}
 
-          {/* STEP 2 */}
+          <div className="mt-4">
 
-          {step === 2 && (
+            <label className="block text-sm font-medium mb-2">
+              Select Subjects
+            </label>
 
-            <>
+            {subjects?.map((subject) => (
 
-              <Input label="First Name"
-                name="first_name"
-                value={formData.first_name}
-                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-              />
+              <div key={subject.id} className="flex items-center mb-2">
 
-              <Input label="Last Name"
-                name="last_name"
-                value={formData.last_name}
-                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-              />
+                <input
+                  type="checkbox"
+                  checked={selectedSubjects.includes(subject.id)}
+                  onChange={() => handleSubjectChange(subject.id)}
+                  className="mr-2"
+                />
 
-              <Input label="Email"
-                name="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-
-              <Input label="Phone"
-                name="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-
-              <Input label="Password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
-
-              <Input label="Confirm Password"
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              />
-
-              <div className="flex justify-between">
-
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="px-4 py-2 bg-gray-300 rounded"
-                >
-                  Back
-                </button>
-
-                <Button type="submit" loading={loading}>
-                  Register
-                </Button>
+                <span>{subject.subject_name}</span>
 
               </div>
 
-            </>
+            ))}
 
-          )}
+          </div>
+
+          <div className="mt-4 text-lg font-semibold text-blue-600">
+            Total Price: ₹{totalPrice}
+          </div>
+
+          <Button type="submit" loading={loading} fullWidth className="mt-6">
+            Register
+          </Button>
 
         </form>
+
+        <div className="mt-6 text-center">
+          <p>
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600 font-medium">
+              Sign in here
+            </Link>
+          </p>
+        </div>
 
       </Card>
 

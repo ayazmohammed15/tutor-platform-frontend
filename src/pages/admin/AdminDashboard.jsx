@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { tutorService } from '../../services/tutorService';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -12,7 +12,13 @@ const AdminDashboard = () => {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
 
-  useEffect(() => { fetchPendingTutors(); }, []);
+ const fetched = useRef(false);
+
+useEffect(() => {
+  if (fetched.current) return;
+  fetched.current = true;
+  fetchPendingTutors();
+}, []);
 
   const fetchPendingTutors = async () => {
     try {

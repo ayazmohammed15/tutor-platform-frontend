@@ -81,7 +81,7 @@ const TutorRegister = () => {
     courseId: "",
     boardId: "",
     classIds: [],
-    subjects: [],
+    subjects: null,
     teachingMode: "",
     expectedFee: "",
     about: "",
@@ -133,7 +133,7 @@ const TutorRegister = () => {
       data.append("about", formData.about);
       data.append("demoLink", formData.demoLink);
 
-      data.append("subjects", JSON.stringify(formData.subjects));
+      data.append("subjectId", formData.subjects);
 
 
       // Files
@@ -332,16 +332,15 @@ const TutorRegister = () => {
               />
               {/* SUBJECTS */}
               <Select
-                isMulti
                 options={subjectOptions}
-                placeholder="Select Subjects"
-                onChange={(opts) => {
-                  console.log("Selected Subjects:", opts);
+                placeholder="Select Subject"
+                onChange={(opt) => {
 
                   setFormData((prev) => ({
                     ...prev,
-                    subjects: opts ? opts.map((o) => o.value) : [],
+                    subjects: opt ? opt.value : null,
                   }));
+
                 }}
               />
 

@@ -9,7 +9,7 @@ const Home = () => {
       <nav className="flex items-center justify-between px-8 py-5 bg-white max-w-7xl mx-auto">
         <div className="text-2xl font-bold tracking-tight">Tutorly</div>
         <div className="hidden md:flex space-x-8 font-medium text-sm text-gray-700">
-          <a href="/login" className="hover:text-blue-600">Find a Tutor</a>
+          <a href="/register" className="hover:text-blue-600">Find a Tutor</a>
           <a href="#" className="hover:text-blue-600">Become a Tutor</a>
           <a href="#" className="hover:text-blue-600">How it Works</a>
           <a href="#" className="hover:text-blue-600">Pricing</a>
@@ -38,7 +38,11 @@ const Home = () => {
               Find expert tutors who make learning flexible, fun, and effective — all from the comfort of home.
             </p>
             <div className="flex space-x-4">
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-md">
+              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-md"
+              onClick={(e)=>{
+            navigate("/register")
+           }}
+              >
                 Find a Tutor
               </button>
               {/* <button className="bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 shadow-md">
