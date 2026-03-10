@@ -236,7 +236,7 @@ const TutorProfile = () => {
                       <button
                         key={slot.time}
                         type="button"
-                        disabled={slot.booked}
+                        disabled={!slot.is_selectable}
                         onClick={() =>
                           setBookingData(prev => ({
                             ...prev,
@@ -244,15 +244,20 @@ const TutorProfile = () => {
                           }))
                         }
                         className={`px-3 py-2 rounded border text-sm
-            ${slot.booked
+      ${!slot.is_selectable
                             ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                             : bookingData.requested_time === slot.time
                               ? "bg-blue-600 text-white"
                               : "bg-white hover:bg-blue-50"
                           }
-          `}
+    `}
                       >
                         {slot.time}
+                        {slot.available_seats !== undefined && (
+                          <div className="text-xs">
+                            {slot.available_seats} left
+                          </div>
+                        )}
                       </button>
                     ))
                   )}
