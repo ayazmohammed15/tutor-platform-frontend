@@ -60,8 +60,14 @@ const Register = () => {
   };
 
   const handleCourseChange = (e) => {
-    const courseSlug = e.target.value;
-    setSelectedCourse(courseSlug);
+    const courseId = e.target.value;
+setSelectedCourse(courseId);
+
+// reset selections
+setSelectedClass("");
+setSelectedSubjects([]);
+
+// optional: set price if needed
     
     // Reset dependent selections
     setSelectedClass("");
@@ -148,8 +154,8 @@ const Register = () => {
             >
               <option value="">Choose a course</option>
               {courses?.map((c) => (
-                <option key={c.id} value={c.slug}>
-                  {c.course_name} (₹{coursePrices[c.slug] || 0})
+                <option key={c.id} value={c.id}>
+                  {c.course_name} 
                 </option>
               ))}
             </select>

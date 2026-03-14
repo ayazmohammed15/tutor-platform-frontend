@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { tutorService } from "../../services/tutorService";
-import { boardService } from "../../services/boardService";
+// import { boardService } from "../../services/boardService";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Select from "../../components/common/Select";
@@ -10,21 +10,34 @@ import toast from "react-hot-toast";
 import { Search, BookOpen, Star, Clock } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCourses,
+  fetchClasses,
+  fetchSubjectsByCourse
+} from "../../features/register/registerSlice";
+
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  console.log("Authenticated user:", user);
+
+  const dispatch = useDispatch();
+
+  const { courses, subjects, classes } = useSelector(
+    (state) => state.register
+  );
 
   /* ================= STATE ================= */
   // ... (Keep ALL your existing state variables here exactly as they are)
-  const [courses, setCourses] = useState([]);
-  const [boards, setBoards] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [subjects, setSubjects] = useState([]);
+  // const [courses, setCourses] = useState([]);
+  // const [boards, setBoards] = useState([]);
+  // const [classes, setClasses] = useState([]);
+  // const [subjects, setSubjects] = useState([]);
   const [chapters, setChapters] = useState([]);
 
   const [filters, setFilters] = useState({
     course_id: "",
-    board_id: "",
     class_id: "",
     subject_id: "",
     chapter_ids: []
@@ -37,97 +50,94 @@ const StudentDashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    setFilters((prev) => ({
-      ...prev,
+    setFilters({
       course_id: user.course_id || "",
-      board_id: user.board_id || "",
       class_id: user.class_id || "",
-      subject_id: user.subject_id || ""
-    }));
+      subject_id: user.subject_id || "",
+      chapter_ids: []
+    });
   }, [user]);
 
   useEffect(() => {
-    if (filters.course_id && filters.subject_id) {
+    if (filters.course_id && filters.subject_id !== "") {
       handleSearch();
     }
   }, [filters.course_id, filters.subject_id]);
 
   useEffect(() => {
-    const loadCourses = async () => {
-      try {
-        const data = await boardService.getCourses();
-        setCourses(data);
-      } catch (err) {
-        toast.error("Failed to load courses");
-      }
-    };
+    dispatch(fetchCourses());
+    dispatch(fetchClasses());
+  }, [dispatch]);
 
-    loadCourses();
-  }, []);
-  /* ================= LOAD BOARDS ================= */
   useEffect(() => {
-    const loadBoards = async () => {
-      try {
-        const data = await boardService.getBoards();
-        setBoards(data);
-      } catch (err) {
-        toast.error("Failed to load boards");
-      }
-    };
-    loadBoards();
-  }, []);
+    if (filters.course_id) {
+      dispatch(fetchSubjectsByCourse(filters.course_id));
+    }
+  }, [filters.course_id, dispatch]);
+  /* ================= LOAD BOARDS ================= */
+  // useEffect(() => {
+  //   const loadBoards = async () => {
+  //     try {
+  //       const data = await boardService.getBoards();
+  //       setBoards(data);
+  //     } catch (err) {
+  //       toast.error("Failed to load boards");
+  //     }
+  //   };
+  //   loadBoards();
+  // }, []);
 
   /* ================= LOAD CLASSES ================= */
-  useEffect(() => {
-    if (!filters.board_id) return;
+  // useEffect(() => {
+  //   if (!filters.board_id) return;
 
-    const loadClasses = async () => {
-      try {
-        const data = await boardService.getClassesByBoard(filters.board_id);
-        setClasses(data);
-      } catch (err) {
-        toast.error("Failed to load classes");
-      }
-    };
+  //   const loadClasses = async () => {
+  //     try {
+  //       const data = await boardService.getClassesByBoard(filters.board_id);
+  //       setClasses(data);
+  //     } catch (err) {
+  //       toast.error("Failed to load classes");
+  //     }
+  //   };
 
-    loadClasses();
-  }, [filters.board_id]);
+  //   loadClasses();
+  // }, [filters.board_id]);
 
   /* ================= LOAD SUBJECTS ================= */
-  useEffect(() => {
-    if (!filters.board_id || !filters.class_id) return;
+  // useEffect(() => {
+  //   if (!filters.board_id || !filters.class_id) return;
 
-    const loadSubjects = async () => {
-      try {
-        const data = await boardService.getSubjectsByClasses(
-          filters.board_id,
-          [filters.class_id]   // send as array
-        );
-        setSubjects(data);
-      } catch (err) {
-        toast.error("Failed to load subjects");
-      }
-    };
+  //   const loadSubjects = async () => {
+  //     try {
+  //       const data = await boardService.getSubjectsByClasses(
+  //         filters.board_id,
+  //         [filters.class_id]   // send as array
+  //       );
+  //       setSubjects(data);
+  //     } catch (err) {
+  //       toast.error("Failed to load subjects");
+  //     }
+  //   };
 
-    loadSubjects();
-  }, [filters.board_id, filters.class_id]);
+  //   loadSubjects();
+  // }, [filters.board_id, filters.class_id]);
 
-  useEffect(() => {
-    if (!filters.subject_id) return;
+  // useEffect(() => {
+  //   if (!filters.subject_id) return;
 
-    const loadChapters = async () => {
-      try {
-        const data = await boardService.getChaptersBySubject(
-          filters.subject_id
-        );
-        setChapters(data);
-      } catch (err) {
-        toast.error("Failed to load chapters");
-      }
-    };
+  //   const loadChapters = async () => {
+  //     try {
+  //       const data = await boardService.getChaptersBySubject(
+  //         filters.subject_id
+  //       );
+  //       setChapters(data);
+  //     } catch (err) {
+  //       toast.error("Failed to load chapters");
+  //     }
+  //   };
 
-    loadChapters();
-  }, [filters.subject_id]);
+  //   loadChapters();
+  // }, [filters.subject_id]);
 
   /* ================= HANDLE CHANGE ================= */
   const handleChange = (e) => {
@@ -137,14 +147,8 @@ const StudentDashboard = () => {
       ...prev,
       [name]: value,
       ...(name === "course_id" && {
-        board_id: "",
-        class_id: "",
         subject_id: "",
-        chapter_ids: []
-      }),
-      ...(name === "board_id" && {
         class_id: "",
-        subject_id: "",
         chapter_ids: []
       }),
       ...(name === "class_id" && {
@@ -160,7 +164,7 @@ const StudentDashboard = () => {
   /* ================= SEARCH TUTORS ================= */
   const handleSearch = async () => {
     if (!filters.course_id || !filters.subject_id) {
-      toast.error("Please select Board, Class and Subject");
+      toast.error("Please select Course and Subject");
       return;
     }
 
@@ -168,19 +172,25 @@ const StudentDashboard = () => {
     setSearched(true);
 
     try {
+      console.log("Search filters:", filters);
+
       const res = await tutorService.searchTutors(filters);
-      const payload = res?.data?.data ?? res?.data ?? res ?? {};
-      const tutorsList = Array.isArray(payload?.tutors) ? payload.tutors : [];
-      console.log("Tutors response:", payload);
+
+      const tutorsList = res?.data?.tutors || [];
+
+      console.log("Tutors response:", tutorsList);
+
       setTutors(tutorsList);
 
       if (tutorsList.length === 0) {
-        toast.info("No tutors found for selected subject");
+        toast("No tutors found for selected subject");
       } else {
         toast.success(`Found ${tutorsList.length} tutor(s)`);
       }
+
     } catch (err) {
-      console.error("Tutor search failed:", err);
+      console.error(err);
+      console.log(err.response?.data);
       toast.error("Something went wrong while searching");
     } finally {
       setLoading(false);
@@ -221,21 +231,14 @@ const StudentDashboard = () => {
             }))}
             placeholder="Select course..."
           />
-          <Select
-            label="Board"
-            name="board_id"
-            value={filters.board_id}
-            onChange={handleChange}
-            options={boards.map((b) => ({ value: b.id, label: b.board_name }))}
-            placeholder="Select board..."
-          />
+
           <Select
             label="Class"
             name="class_id"
             value={filters.class_id}
             onChange={handleChange}
             options={classes.map((c) => ({ value: c.id, label: c.class_name }))}
-            disabled={!filters.board_id}
+            disabled={!filters.course_id}
             placeholder="Select class..."
           />
           <Select
@@ -244,7 +247,7 @@ const StudentDashboard = () => {
             value={filters.subject_id}
             onChange={handleChange}
             options={subjects.map((s) => ({ value: s.id, label: s.subject_name }))}
-            disabled={!filters.class_id}
+            disabled={!filters.course_id}
             placeholder="Select subject..."
           />
           <Select
