@@ -8,7 +8,7 @@ import RolePlaceholder from './components/common/RolePlaceholder';
 
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
+import Register from './pages/student/Register';
 import StudentDashboard from './pages/student/StudentDashboard';
 import TutorProfile from './pages/student/TutorProfile';
 import StudentSessions from './pages/student/StudentSessions';
