@@ -15,10 +15,17 @@ const TutorProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const subject_id = location.state?.subject_id;
-  const chapter_ids = location.state?.chapter_ids || [];
+  const class_id = location.state?.class_id;
+  const course_id = location.state?.course_id;
+  // const chapter_ids = location.state?.chapter_ids || [];
   const [tutor, setTutor] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
+  //   const [selectedClassId, setSelectedClassId] = useState(class_id || null);
+  // const [selectedCourseId, setSelectedCourseId] = useState(course_id || null);
+  const selectedClassId = Number(class_id);
+  const selectedCourseId = Number(course_id);
+  const parsedSubjectId = Number(subject_id);
   const [slots, setSlots] = useState([]);
   const [bookingData, setBookingData] = useState({
     requested_date: '',
@@ -30,6 +37,13 @@ const TutorProfile = () => {
   useEffect(() => {
     fetchTutorData();
   }, [tutorId]);
+
+  useEffect(() => {
+    if (!subject_id || !class_id || !course_id) {
+      toast.error("Missing booking data. Please search again.");
+      navigate("/student/dashboard");
+    }
+  }, []);
 
   const fetchTutorData = async () => {
     try {
@@ -83,7 +97,6 @@ const TutorProfile = () => {
 
   const handleBooking = async (e) => {
     e.preventDefault();
-    const parsedSubjectId = Number(subject_id);
 
     if (!Number.isFinite(parsedSubjectId) || parsedSubjectId <= 0) {
       toast.error('Please select a subject before booking a session');
@@ -101,6 +114,8 @@ const TutorProfile = () => {
       const requestData = {
         tutor_id: parseInt(tutorId),
         subject_id: parsedSubjectId,
+        class_id: selectedClassId,     // ✅ ADD
+        course_id: selectedCourseId,   // ✅ ADD
         requested_date: bookingData.requested_date,
         requested_time: bookingData.requested_time,
         notes: bookingData.notes,
@@ -111,6 +126,12 @@ const TutorProfile = () => {
       navigate('/student/sessions');
     } catch (error) {
       console.error('Booking error:', error);
+      alert(
+        error?.response?.data?.message || 'Booking failed'
+      );
+      toast.error(
+        error?.response?.data?.message || 'Booking failed'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -253,32 +274,32 @@ const TutorProfile = () => {
                           : !slot.booked && hasSeats;
 
                       return (
-                      <button
-                        key={slot.id || slotTime}
-                        type="button"
-                        disabled={!isSelectable}
-                        onClick={() =>
-                          setBookingData(prev => ({
-                            ...prev,
-                            requested_time: slotTime
-                          }))
-                        }
-                        className={`px-3 py-2 rounded border text-sm
-      ${!isSelectable
-                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                            : bookingData.requested_time === slotTime
-                              ? "bg-blue-600 text-white"
-                              : "bg-white hover:bg-blue-50"
+                        <button
+                          key={slot.id || slotTime}
+                          type="button"
+                          disabled={!isSelectable}
+                          onClick={() =>
+                            setBookingData(prev => ({
+                              ...prev,
+                              requested_time: slotTime
+                            }))
                           }
-    `}
-                      >
-                        {slotTime}
-                        {slot.available_seats !== undefined && (
-                          <div className="text-xs">
-                            {slot.available_seats} left
-                          </div>
-                        )}
-                      </button>
+                          className={`px-3 py-2 rounded border text-sm
+    ${!isSelectable
+                              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                              : bookingData.requested_time === slotTime
+                                ? "bg-blue-600 text-white"
+                                : "bg-white hover:bg-blue-50"
+                            }
+  `}
+                        >
+                          {slotTime}
+                          {slot.available_seats !== undefined && (
+                            <div className="text-xs">
+                              {slot.available_seats} left
+                            </div>
+                          )}
+                        </button>
                     )})
                   )}
                 </div>

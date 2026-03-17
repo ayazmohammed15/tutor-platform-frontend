@@ -209,9 +209,11 @@ const StudentDashboard = () => {
 
     navigate(`/student/tutor/${id}`, {
       state: {
-        subject_id: filters.subject_id,
-        chapter_ids: filters.chapter_ids
-      }
+  subject_id: filters.subject_id,
+  class_id: filters.class_id,       // ✅ ADD
+  course_id: filters.course_id,     // ✅ ADD
+  // chapter_ids: filters.chapter_id
+}
     });
   };
 
@@ -248,7 +250,7 @@ const StudentDashboard = () => {
             onChange={handleChange}
             options={classes.map((c) => ({ value: c.id, label: c.class_name }))}
             disabled={!filters.course_id}
-            placeholder="Select class..."
+            placeholder="Select class..." 
           />
           <Select
             label="Subject"
