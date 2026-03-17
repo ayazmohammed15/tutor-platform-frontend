@@ -61,19 +61,12 @@ const Register = () => {
 
   const handleCourseChange = (e) => {
     const courseId = e.target.value;
-setSelectedCourse(courseId);
+    const course = courses?.find((item) => String(item.id) === String(courseId));
+    const courseSlug = course?.slug || "";
 
-// reset selections
-setSelectedClass("");
-setSelectedSubjects([]);
-
-// optional: set price if needed
-    
-    // Reset dependent selections
+    setSelectedCourse(courseId);
     setSelectedClass("");
     setSelectedSubjects([]);
-    
-    // Update Price
     setTotalPrice(coursePrices[courseSlug] || 0);
   };
 
@@ -100,9 +93,14 @@ setSelectedSubjects([]);
   if (!selectedClass) return toast.error("Please select a class");
   if (selectedSubjects.length === 0) return toast.error("Please select subjects");
 
+  const selectedCourseData = courses?.find(
+    (course) => String(course.id) === String(selectedCourse)
+  );
+
   const payload = {
     ...formData,
-    course: selectedCourse,
+    course: selectedCourseData?.slug || "",
+    course_id: selectedCourseData?.id || selectedCourse,
     class_id: selectedClass,
     subjects: selectedSubjects,
     total_price: totalPrice,

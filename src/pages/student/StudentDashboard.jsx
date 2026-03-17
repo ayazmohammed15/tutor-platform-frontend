@@ -202,6 +202,11 @@ const StudentDashboard = () => {
   };
 
   const handleTutorClick = (id) => {
+    if (!filters.subject_id) {
+      toast.error("Please select a subject before viewing tutor details");
+      return;
+    }
+
     navigate(`/student/tutor/${id}`, {
       state: {
         subject_id: filters.subject_id,

@@ -10,12 +10,29 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate(); // 2. Initialize navigate
 
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       const currentUser = authService.getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
+
+      if (!currentUser) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      setUser(currentUser);
+
+      try {
+        const response = await authService.getProfile();
+        const profileUser = response?.data?.user || response?.data || response?.user;
+
+        if (profileUser) {
+          setUser(profileUser);
+          localStorage.setItem('user', JSON.stringify(profileUser));
+        }
+      } catch (error) {
+        console.error('Failed to refresh auth profile:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     initAuth();

@@ -83,12 +83,24 @@ const TutorProfile = () => {
 
   const handleBooking = async (e) => {
     e.preventDefault();
+    const parsedSubjectId = Number(subject_id);
+
+    if (!Number.isFinite(parsedSubjectId) || parsedSubjectId <= 0) {
+      toast.error('Please select a subject before booking a session');
+      return;
+    }
+
+    if (!bookingData.requested_time) {
+      toast.error('Please select a time slot');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const requestData = {
         tutor_id: parseInt(tutorId),
-        subject_id: subject_id,
+        subject_id: parsedSubjectId,
         requested_date: bookingData.requested_date,
         requested_time: bookingData.requested_time,
         notes: bookingData.notes,
@@ -232,34 +244,42 @@ const TutorProfile = () => {
                       No slots available
                     </p>
                   ) : (
-                    slots.map(slot => (
+                    slots.map((slot) => {
+                      const slotTime = slot.time || slot.start_time?.slice(0, 5) || "";
+                      const hasSeats = slot.available_seats === undefined || Number(slot.available_seats) > 0;
+                      const isSelectable =
+                        typeof slot.is_selectable === "boolean"
+                          ? slot.is_selectable
+                          : !slot.booked && hasSeats;
+
+                      return (
                       <button
-                        key={slot.time}
+                        key={slot.id || slotTime}
                         type="button"
-                        disabled={!slot.is_selectable}
+                        disabled={!isSelectable}
                         onClick={() =>
                           setBookingData(prev => ({
                             ...prev,
-                            requested_time: slot.time
+                            requested_time: slotTime
                           }))
                         }
                         className={`px-3 py-2 rounded border text-sm
-      ${!slot.is_selectable
+      ${!isSelectable
                             ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                            : bookingData.requested_time === slot.time
+                            : bookingData.requested_time === slotTime
                               ? "bg-blue-600 text-white"
                               : "bg-white hover:bg-blue-50"
                           }
     `}
                       >
-                        {slot.time}
+                        {slotTime}
                         {slot.available_seats !== undefined && (
                           <div className="text-xs">
                             {slot.available_seats} left
                           </div>
                         )}
                       </button>
-                    ))
+                    )})
                   )}
                 </div>
               )}
