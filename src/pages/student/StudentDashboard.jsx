@@ -59,10 +59,10 @@ const StudentDashboard = () => {
   }, [user]);
 
   useEffect(() => {
-    if (filters.course_id && filters.subject_id !== "") {
+    if (filters.course_id && filters.class_id) {
       handleSearch();
     }
-  }, [filters.course_id, filters.subject_id]);
+  }, [filters.course_id, filters.class_id]);
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -163,8 +163,8 @@ const StudentDashboard = () => {
 
   /* ================= SEARCH TUTORS ================= */
   const handleSearch = async () => {
-    if (!filters.course_id || !filters.subject_id) {
-      toast.error("Please select Course and Subject");
+    if (!filters.course_id || !filters.class_id) {
+      toast.error("Please select Course and Class");
       return;
     }
 
@@ -174,7 +174,11 @@ const StudentDashboard = () => {
     try {
       console.log("Search filters:", filters);
 
-      const res = await tutorService.searchTutors(filters);
+      const res = await tutorService.searchTutors({
+        course_id: filters.course_id,
+        class_id: filters.class_id,
+        subject_id: filters.subject_id || undefined
+      });
 
       const tutorsList = res?.data?.tutors || [];
 
