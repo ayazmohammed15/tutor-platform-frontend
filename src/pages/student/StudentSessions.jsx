@@ -35,36 +35,39 @@ const StudentSessions = () => {
     setProcessingPayment(session.id);
 
     try {
-      const user = authService.getCurrentUser();
       const orderResponse = await paymentService.createOrder(session.id);
       const orderData = orderResponse.data;
 
-      paymentService.initiateRazorpay(
-        {
-          ...orderData,
-          userName: user.full_name,
-          userEmail: user.email,
-        },
-        async (paymentData) => {
-          try {
-            await paymentService.verifyPayment(paymentData);
-            toast.success('Payment successful! Session confirmed.');
-            fetchAllData();
-          } catch (error) {
-            toast.error('Payment verification failed');
-          } finally {
-            setProcessingPayment(null);
-          }
-        },
-        (error) => {
-          toast.error(error || 'Payment failed');
-          setProcessingPayment(null);
-        }
-      );
+      console.log("ORDER DATA:", orderData);
+
+      // 🔥 FORCE MOCK FLOW (no env dependency)
+      const success = window.confirm("Simulate payment success?");
+
+      if (!success) {
+        toast.error("Payment failed");
+        setProcessingPayment(null);
+        return;
+      }
+
+      console.log("CALLING VERIFY API...");
+
+      await paymentService.verifyPayment({
+        razorpay_order_id: orderData.orderId,
+        razorpay_payment_id: "mock_payment",
+        razorpay_signature: "mock_signature"
+      });
+
+      console.log("VERIFY DONE");
+
+      toast.success("Payment successful!");
+      await fetchAllData();
+
     } catch (error) {
-      toast.error('Payment initiation failed');
-      setProcessingPayment(null);
+      console.error("ERROR:", error);
+      toast.error("Payment failed");
     }
+
+    setProcessingPayment(null);
   };
 
   const formatDate = (date) =>
@@ -89,7 +92,7 @@ const StudentSessions = () => {
                     Request to {request.tutor_name}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    {formatDate(request.requested_date)} at {request.requested_time.slice(0,5)}
+                    {formatDate(request.requested_date)} at {request.requested_time.slice(0, 5)}
                   </p>
                   <span className="text-yellow-600 font-medium">
                     Waiting for tutor approval
@@ -113,7 +116,7 @@ const StudentSessions = () => {
                     Request to {request.tutor_name}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    {formatDate(request.requested_date)} at {request.requested_time.slice(0,5)}
+                    {formatDate(request.requested_date)} at {request.requested_time.slice(0, 5)}
                   </p>
                   <span className="text-red-600 font-medium">
                     Rejected
@@ -159,7 +162,7 @@ const StudentSessions = () => {
                 <div>
                   <p className="text-sm text-gray-600">Time</p>
                   <p className="font-medium">
-                    {session.scheduled_time.slice(0,5)}
+                    {session.scheduled_time.slice(0, 5)}
                   </p>
                 </div>
                 <div>
