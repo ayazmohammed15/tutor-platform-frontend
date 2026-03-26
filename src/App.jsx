@@ -30,6 +30,7 @@ import TutorAssignments from './pages/tutor/TutorAssignments';
 import TutorPayments from './pages/tutor/TutorPayments';
 import TutorAvailability from './pages/tutor/TutorAvailability';
 import TutorRegistrationSuccess from "./components/common/TutorRegistrationSuccess";
+import StudentProfile from './pages/student/StudentProfile';
 
 function App() {
   return (
@@ -84,8 +85,7 @@ function App() {
             <Route path="sessions" element={<StudentSessions />} />
             <Route
               path="profile"
-              element={<RolePlaceholder title="My Profile" description="Student profile details will appear here." />}
-            />
+              element={<StudentProfile />} />
             <Route
               path="assignments"
               element={<RolePlaceholder title="Assignments" description="Student assignments will appear here." />}
