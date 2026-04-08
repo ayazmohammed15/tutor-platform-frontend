@@ -1,5 +1,38 @@
 import api from './api';
 
+let razorpayScriptPromise = null;
+
+const loadRazorpayScript = () => {
+  if (window.Razorpay) {
+    return Promise.resolve(true);
+  }
+
+  if (razorpayScriptPromise) {
+    return razorpayScriptPromise;
+  }
+
+  razorpayScriptPromise = new Promise((resolve) => {
+    const existingScript = document.querySelector(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(true), { once: true });
+      existingScript.addEventListener('error', () => resolve(false), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
+  return razorpayScriptPromise;
+};
+
 export const paymentService = {
   createOrder: async (sessionId) => {
     const response = await api.post(`/payments/create-order/${sessionId}`);
@@ -11,10 +44,17 @@ export const paymentService = {
     return response.data;
   },
 
-  initiateRazorpay: (orderData, onSuccess, onFailure) => {
+  initiateRazorpay: async (orderData, onSuccess, onFailure) => {
+    const scriptLoaded = await loadRazorpayScript();
+
+    if (!scriptLoaded || !window.Razorpay) {
+      onFailure('Razorpay SDK failed to load');
+      return;
+    }
+
     const options = {
       key: orderData.keyId,
-      amount: orderData.amount * 100,
+      amount: Number(orderData.amount) * 100,
       currency: orderData.currency,
       order_id: orderData.orderId,
       name: 'Tutor Booking Platform',
@@ -42,7 +82,7 @@ export const paymentService = {
 
     const rzp = new window.Razorpay(options);
     rzp.on('payment.failed', function (response) {
-      onFailure(response.error.description);
+      onFailure(response.error?.description || 'Payment failed');
     });
     rzp.open();
   },

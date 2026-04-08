@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { sessionService } from '../../services/sessionService';
 import { paymentService } from '../../services/paymentService';
-import { authService } from '../../services/authService';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -36,38 +35,48 @@ const StudentSessions = () => {
 
     try {
       const orderResponse = await paymentService.createOrder(session.id);
-      const orderData = orderResponse.data;
+      const orderData = orderResponse?.data || orderResponse;
 
-      console.log("ORDER DATA:", orderData);
-
-      // 🔥 FORCE MOCK FLOW (no env dependency)
-      const success = window.confirm("Simulate payment success?");
-
-      if (!success) {
-        toast.error("Payment failed");
-        setProcessingPayment(null);
-        return;
+      if (
+        !orderData?.orderId ||
+        !orderData?.keyId ||
+        !orderData?.amount ||
+        !orderData?.currency
+      ) {
+        throw new Error('Invalid payment order response');
       }
 
-      console.log("CALLING VERIFY API...");
+      await paymentService.initiateRazorpay(
+        orderData,
+        async (response) => {
+          try {
+            const verifyResponse = await paymentService.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
 
-      await paymentService.verifyPayment({
-        razorpay_order_id: orderData.orderId,
-        razorpay_payment_id: "mock_payment",
-        razorpay_signature: "mock_signature"
-      });
+            if (!verifyResponse.success) {
+              throw new Error(verifyResponse.message || 'Payment verification failed');
+            }
 
-      console.log("VERIFY DONE");
-
-      toast.success("Payment successful!");
-      await fetchAllData();
-
+            toast.success('Payment successful!');
+            await fetchAllData();
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            toast.error(error.message || 'Payment verification failed');
+          }
+        },
+        (message) => {
+          toast.error(message || 'Payment failed');
+        }
+      );
     } catch (error) {
-      console.error("ERROR:", error);
-      toast.error("Payment failed");
+      console.error('Payment error:', error);
+      toast.error(error.message || 'Payment failed');
+    } finally {
+      setProcessingPayment(null);
     }
-
-    setProcessingPayment(null);
   };
 
   const formatDate = (date) =>
@@ -79,13 +88,12 @@ const StudentSessions = () => {
     <div>
       <h1 className="text-3xl font-bold mb-8">My Sessions</h1>
 
-      {/* ---------------- PENDING REQUESTS ---------------- */}
-      {requests.filter(r => r.status === 'pending').length > 0 && (
+      {requests.filter((request) => request.status === 'pending').length > 0 && (
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-4">Pending Requests</h2>
           <div className="space-y-4">
             {requests
-              .filter(r => r.status === 'pending')
+              .filter((request) => request.status === 'pending')
               .map((request) => (
                 <Card key={request.id}>
                   <h3 className="font-semibold text-lg">
@@ -103,13 +111,12 @@ const StudentSessions = () => {
         </div>
       )}
 
-      {/* ---------------- REJECTED REQUESTS ---------------- */}
-      {requests.filter(r => r.status === 'rejected').length > 0 && (
+      {requests.filter((request) => request.status === 'rejected').length > 0 && (
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-4">Rejected Requests</h2>
           <div className="space-y-4">
             {requests
-              .filter(r => r.status === 'rejected')
+              .filter((request) => request.status === 'rejected')
               .map((request) => (
                 <Card key={request.id}>
                   <h3 className="font-semibold text-lg">
@@ -127,7 +134,6 @@ const StudentSessions = () => {
         </div>
       )}
 
-      {/* ---------------- CONFIRMED SESSIONS ---------------- */}
       {sessions.length === 0 ? (
         <Card>
           <p className="text-center text-gray-600">
@@ -185,7 +191,7 @@ const StudentSessions = () => {
               {session.status === 'paid' && session.zoom_meeting_link && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <h4 className="font-semibold text-green-900 mb-2">
-                    Session Confirmed 🎉
+                    Session Confirmed
                   </h4>
                   <a
                     href={session.zoom_meeting_link}
