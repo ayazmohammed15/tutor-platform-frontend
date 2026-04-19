@@ -28,14 +28,19 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url || '';
+    const isLoginRequest = requestUrl.includes('/auth/login');
+
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
 
-    const message = error.response?.data?.message || 'An error occurred';
-    toast.error(message);
+    if (!isLoginRequest) {
+      const message = error.response?.data?.message || 'An error occurred';
+      toast.error(message);
+    }
 
     return Promise.reject(error);
   }

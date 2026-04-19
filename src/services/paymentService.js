@@ -34,8 +34,10 @@ const loadRazorpayScript = () => {
 };
 
 export const paymentService = {
-  createOrder: async (sessionId) => {
-    const response = await api.post(`/payments/create-order/${sessionId}`);
+  createOrder: async (sessionId, paymentMethod = 'upi') => {
+    const response = await api.post(`/payments/create-order/${sessionId}`, {
+      payment_method: paymentMethod,
+    });
     return response.data;
   },
 

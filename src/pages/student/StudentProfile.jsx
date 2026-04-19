@@ -1,21 +1,61 @@
-import React from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Pencil } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { fetchClasses, fetchCourses } from '../../features/register/registerSlice';
 
 const StudentProfile = () => {
-  // Placeholder data - you will eventually replace this with your Redux/Context state
+  const dispatch = useDispatch();
+  const { user, loading } = useAuth();
+  const { courses, classes } = useSelector((state) => state.register);
+
+  useEffect(() => {
+    if (!courses.length) {
+      dispatch(fetchCourses());
+    }
+
+    if (!classes.length) {
+      dispatch(fetchClasses());
+    }
+  }, [classes.length, courses.length, dispatch]);
+
+  const findById = (items, id) =>
+    items.find((item) => String(item.id) === String(id));
+
+  const course = findById(courses, user?.course_id);
+  const studentClass = findById(classes, user?.class_id);
+
   const studentData = {
-    firstName: 'Praveen',
-    lastName: 'Kumar',
-    email: 'praveen.kumar@example.com',
-    phone: '+91 98765 43210',
-    bio: 'Electrical and Electronics Engineering Student',
-    role: 'Student',
-    location: 'Hyderabad, India',
-    country: 'India',
-    cityState: 'Hyderabad, Telangana',
-    postalCode: '500001',
-    studentId: 'STU-45645756', // Replaced "TAX ID" with a more student-appropriate label
+    firstName: user?.first_name || '',
+    lastName: user?.last_name || '',
+    email: user?.email || '',
+    role: user?.role || 'student',
+    course: course?.course_name || user?.course_name || user?.course_id || '',
+    className: studentClass?.class_name || user?.class_name || user?.class_id || '',
+    studentId: user?.id ? `STU-${user.id}` : '',
   };
+
+  const fullName =
+    `${studentData.firstName} ${studentData.lastName}`.trim() || 'Student Account';
+
+  const initials =
+    `${studentData.firstName?.[0] || ''}${studentData.lastName?.[0] || ''}`.toUpperCase() ||
+    studentData.email?.[0]?.toUpperCase() ||
+    'S';
+
+  const formatRole = (role) =>
+    role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Student';
+
+  const displayValue = (value) => value || 'Not provided';
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   // Reusable Edit Button Component
   const EditButton = () => (
@@ -34,17 +74,17 @@ const StudentProfile = () => {
           <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
              {/* You can replace this with an actual <img src="..." /> later */}
             <span className="text-2xl font-bold text-white">
-              {studentData.firstName.charAt(0)}{studentData.lastName.charAt(0)}
+              {initials}
             </span>
           </div>
           
           {/* User Info */}
           <div>
             <h1 className="text-xl font-bold text-gray-900">
-              {studentData.firstName} {studentData.lastName}
+              {fullName}
             </h1>
-            <p className="text-gray-500 font-medium">{studentData.role}</p>
-            <p className="text-gray-400 text-sm mt-1">{studentData.location}</p>
+            <p className="text-gray-500 font-medium">{formatRole(studentData.role)}</p>
+            <p className="text-gray-400 text-sm mt-1">{displayValue(studentData.email)}</p>
           </div>
         </div>
         <EditButton />
@@ -60,50 +100,42 @@ const StudentProfile = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
           <div>
             <p className="text-sm text-gray-500 mb-1">First Name</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.firstName}</p>
+            <p className="text-base font-semibold text-gray-900">{displayValue(studentData.firstName)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-1">Last Name</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.lastName}</p>
+            <p className="text-base font-semibold text-gray-900">{displayValue(studentData.lastName)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-1">Email address</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.email}</p>
+            <p className="text-base font-semibold text-gray-900">{displayValue(studentData.email)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 mb-1">Phone</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.phone}</p>
-          </div>
-          <div className="md:col-span-2">
-            <p className="text-sm text-gray-500 mb-1">Bio</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.bio}</p>
+            <p className="text-sm text-gray-500 mb-1">Role</p>
+            <p className="text-base font-semibold text-gray-900">{formatRole(studentData.role)}</p>
           </div>
         </div>
       </div>
 
-      {/* 3. Address Card */}
+      {/* 3. Academic Information Card */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-900">Address</h2>
+          <h2 className="text-lg font-bold text-gray-900">Academic Information</h2>
           <EditButton />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
           <div>
-            <p className="text-sm text-gray-500 mb-1">Country</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.country}</p>
+            <p className="text-sm text-gray-500 mb-1">Course</p>
+            <p className="text-base font-semibold text-gray-900">{displayValue(studentData.course)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 mb-1">City/State</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.cityState}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Postal Code</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.postalCode}</p>
+            <p className="text-sm text-gray-500 mb-1">Class</p>
+            <p className="text-base font-semibold text-gray-900">{displayValue(studentData.className)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-1">Student ID</p>
-            <p className="text-base font-semibold text-gray-900">{studentData.studentId}</p>
+            <p className="text-base font-semibold text-gray-900">{displayValue(studentData.studentId)}</p>
           </div>
         </div>
       </div>

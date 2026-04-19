@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 
 const learningTabs = {
@@ -57,9 +57,9 @@ const Home = () => {
           <a href="#" className="hover:text-blue-600"></a>
         </div>
         <div className="flex items-center space-x-6">
-          <a href="/login" className="text-sm font-medium hover:text-blue-600">Sign In</a>
+          <Link to="/login" className="text-sm font-medium hover:text-blue-600">Sign In</Link>
           <button className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-            onClick={(e) => {
+            onClick={() => {
               navigate("/register")
             }}
           >

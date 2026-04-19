@@ -34,7 +34,7 @@ const StudentSessions = () => {
     setProcessingPayment(session.id);
 
     try {
-      const orderResponse = await paymentService.createOrder(session.id);
+      const orderResponse = await paymentService.createOrder(session.id, 'upi');
       const orderData = orderResponse?.data || orderResponse;
 
       if (

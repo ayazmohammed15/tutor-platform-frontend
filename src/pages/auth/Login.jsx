@@ -27,13 +27,14 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
+    console.log("FORM SUBMIT TRIGGERED");
     e.preventDefault();
     setLoading(true);
 
     try {
       const response = await login(formData);
 
-      if (response.success) {
+      if (response?.success) {
         toast.success('Login successful!');
 
         const role = response.data.user.role;
@@ -46,10 +47,14 @@ const Login = () => {
         } else {
           navigate('/');
         }
+      } else {
+        console.log("LOGIN RESPONSE:", response);
+        toast.error(response?.message || 'Invalid credentials. Please try again.');
       }
+
       console.log("LOGIN RESPONSE:", response);
     } catch (error) {
-      debugger
+      toast.error(error?.response?.data?.message || error.message || 'Login failed. Please check your credentials and try again.');
       console.error('Login error:', error);
     } finally {
       setLoading(false);
@@ -66,22 +71,26 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <Input
+            id="email"
             label="Email"
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your email"
+            autocomplete="email"
             required
           />
 
           <Input
+            id="password"
             label="Password"
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Enter your password"
+            autocomplete="current-password"
             required
           />
 
