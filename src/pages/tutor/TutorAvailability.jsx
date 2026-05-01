@@ -3,7 +3,7 @@ import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
 import toast from "react-hot-toast";
-import { availabilityService } from "../../services/sessionService";
+import api from "../../services/api";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -20,64 +20,49 @@ const TutorAvailability = () => {
 
   const [slotType, setSlotType] = useState(60);
   const [excludedDates, setExcludedDates] = useState([]);
-  const [currentAvailability, setCurrentAvailability] = useState([]);
-  const [availabilityRange, setAvailabilityRange] = useState({ start: "", end: "" });
-
-  const normalizeAvailability = (value) => {
-    if (Array.isArray(value)) return value;
-    if (!value) return [];
-    if (Array.isArray(value.slots)) return value.slots;
-    if (Array.isArray(value.data?.slots)) return value.data.slots;
-    if (Array.isArray(value.data)) return value.data;
-    return [];
-  };
-
-  const groupSlotsByDay = (slots) => {
-    return slots.reduce((grouped, slot) => {
-      const day = slot.day_of_week || slot.day || "Other";
-      if (!grouped[day]) grouped[day] = [];
-      grouped[day].push(slot);
-      return grouped;
-    }, {});
-  };
-
-  const getCommonTimeString = (slots) => {
-    const uniqueTimes = Array.from(
-      new Set(
-        slots.map((slot) => `${slot.start_time.slice(0, 5)} - ${slot.end_time.slice(0, 5)}`)
-      )
-    );
-    return uniqueTimes.join(", ");
-  };
-
-  const getDaysLabel = (slots) => {
-    const uniqueDays = Array.from(
-      new Set(slots.map((slot) => slot.day_of_week || slot.day || "Other"))
-    );
-    if (uniqueDays.length >= 7) {
-      return "Mon - Sun";
-    }
-    return uniqueDays.join(", ");
-  };
+  const [existingRange, setExistingRange] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [mode, setMode] = useState("create");
+  const [availabilityData, setAvailabilityData] = useState(null);
 
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        const res = await availabilityService.getMySlots();
-        const normalized = normalizeAvailability(res);
-        setCurrentAvailability(normalized);
+        const res = await api.get("/availability/my");
+        const data = res.data.data;
+        setAvailabilityData(data);
 
-        const rangeData = res?.data?.availability_range || res?.availability_range;
-        const start = rangeData?.start_date || res?.start_date || res?.data?.start_date || "";
-        const end = rangeData?.end_date || res?.end_date || res?.data?.end_date || "";
-        if (start || end) {
-          setAvailabilityRange({
-            start: start ? new Date(start).toISOString().split('T')[0] : "",
-            end: end ? new Date(end).toISOString().split('T')[0] : ""
-          });
+        if (data.range) {
+          setExistingRange(data.range);
+          setIsEditMode(true);
+          setMode("edit");
+          // dates
+          const formatDateLocal = (dateStr) => {
+            const date = new Date(dateStr);
+            const offset = date.getTimezoneOffset();
+            const localDate = new Date(date.getTime() - offset * 60000);
+            return localDate.toISOString().split("T")[0];
+          };
+
+          setStartDate(formatDateLocal(data.range.start_date));
+          setEndDate(formatDateLocal(data.range.end_date));
+
+          // excluded
+          setExcludedDates(data.excluded.map(d => d.date));
+
+          // working days
+          const days = [...new Set(data.slots.map(s => s.day_of_week))];
+          setWorkingDays(days);
+
+          // time (take first slot)
+          if (data.slots.length > 0) {
+            setStartTime(data.slots[0].start_time.slice(0, 5));
+            setEndTime(data.slots[0].end_time.slice(0, 5));
+          }
         }
+
       } catch (err) {
-        console.error("Failed to load availability", err);
+        console.log(err);
       }
     };
 
@@ -156,71 +141,103 @@ const TutorAvailability = () => {
         excluded_dates: excludedDates,
       };
 
-      const res = await availabilityService.saveAvailability(payload);
+      if (mode === "edit") {
+        await api.put("/availability/update", payload);
+        toast.success("Availability updated successfully");
+      }
+
+      else if (mode === "extend") {
+        await api.post("/availability/save", payload);
+        toast.success("Availability extended successfully");
+      }
+
+      else {
+        await api.post("/availability/save", payload);
+        toast.success("Availability saved successfully");
+      }
 
       toast.success("Availability saved successfully");
-      
-      // Refetch availability to update the display
-      const updatedRes = await availabilityService.getMySlots();
-      const normalized = normalizeAvailability(updatedRes);
-      setCurrentAvailability(normalized);
-
-      const rangeData = updatedRes?.data?.availability_range || updatedRes?.availability_range;
-      const start = rangeData?.start_date || updatedRes?.start_date || updatedRes?.data?.start_date || "";
-      const end = rangeData?.end_date || updatedRes?.end_date || updatedRes?.data?.end_date || "";
-      if (start || end) {
-        setAvailabilityRange({ 
-          start: start ? (typeof start === 'string' && start.includes('T') ? new Date(start).toISOString().split('T')[0] : start) : "", 
-          end: end ? (typeof end === 'string' && end.includes('T') ? new Date(end).toISOString().split('T')[0] : end) : "" 
-        });
-      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to save availability");
     }
   };
 
+  const formatDateLocal = (dateStr) => {
+    const date = new Date(dateStr);
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60000);
+    return localDate.toISOString().split("T")[0];
+  };
+
   return (
     <div className="space-y-10">
 
+      {existingRange && (
+        <div className="bg-blue-50 p-4 rounded-lg mb-6">
+          <p className="font-semibold">
+            Your Availability:
+            {formatDateLocal(existingRange.start_date)} → {formatDateLocal(existingRange.end_date)}
+          </p>
+
+          <div className="flex gap-4 mt-3">
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+              onClick={() => {
+                setMode("edit");
+
+                if (!availabilityData) return;
+
+                const formatDateLocal = (dateStr) => {
+                  const date = new Date(dateStr);
+                  const offset = date.getTimezoneOffset();
+                  const localDate = new Date(date.getTime() - offset * 60000);
+                  return localDate.toISOString().split("T")[0];
+                };
+
+                // ✅ dates
+                setStartDate(formatDateLocal(availabilityData.range.start_date));
+                setEndDate(formatDateLocal(availabilityData.range.end_date));
+
+                // ✅ working days
+                const days = [...new Set(availabilityData.slots.map(s => s.day_of_week))];
+                setWorkingDays(days);
+
+                // ✅ time
+                if (availabilityData.slots.length > 0) {
+                  setStartTime(availabilityData.slots[0].start_time.slice(0, 5));
+                  setEndTime(availabilityData.slots[0].end_time.slice(0, 5));
+                }
+
+                // ✅ excluded dates
+                setExcludedDates(availabilityData.excluded.map(d => d.date));
+              }}
+            >
+              Edit
+            </button>
+
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded"
+              onClick={() => {
+                setMode("extend");
+                setStartDate(""); // clear for new
+                setEndDate("");
+                setWorkingDays([]);
+                setExcludedDates([]);
+                setStartTime("09:00");
+                setEndTime("17:00");
+                setBreakStart("");
+                setBreakEnd("");
+              }}
+            >
+              Extend
+            </button>
+          </div>
+        </div>
+      )}
       <h2 className="text-3xl font-bold text-gray-800">
         Set Your Availability
       </h2>
-
-      <Card className="p-6">
-        <div className="flex flex-col gap-3">
-          <div>
-            <h3 className="text-xl font-semibold">Current Availability</h3>
-            <p className="text-sm text-gray-500">
-              Review your saved availability before adding or updating time blocks.
-            </p>
-          </div>
-
-          {currentAvailability.length === 0 ? (
-            <p className="text-gray-600">No availability has been set yet.</p>
-          ) : (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-blue-500">
-                    {availabilityRange.start && availabilityRange.end
-                      ? `${availabilityRange.start} → ${availabilityRange.end}`
-                      : getDaysLabel(normalizeAvailability(currentAvailability))}
-                  </p>
-                  {availabilityRange.start && availabilityRange.end && (
-                    <p className="text-xs text-slate-500">
-                      {getDaysLabel(normalizeAvailability(currentAvailability))}
-                    </p>
-                  )}
-                </div>
-                <p className="text-sm text-slate-700">
-                  {getCommonTimeString(normalizeAvailability(currentAvailability))}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
 
       {/* 1️⃣ Month Range */}
       <Card className="p-6">
@@ -233,6 +250,7 @@ const TutorAvailability = () => {
             type="date"
             label="Start Date"
             value={startDate}
+            min={existingRange ? existingRange.end_date : ""}
             onChange={(e) => setStartDate(e.target.value)}
           />
 
@@ -240,6 +258,7 @@ const TutorAvailability = () => {
             type="date"
             label="End Date"
             value={endDate}
+            min={startDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
@@ -257,8 +276,8 @@ const TutorAvailability = () => {
               key={day}
               onClick={() => toggleDay(day)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition ${workingDays.includes(day)
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200"
                 }`}
             >
               {day}
@@ -318,8 +337,8 @@ const TutorAvailability = () => {
               key={d}
               onClick={() => setSlotType(d)}
               className={`px-6 py-3 rounded-lg font-medium transition ${slotType === d
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200"
                 }`}
             >
               {d} Minutes
@@ -353,9 +372,12 @@ const TutorAvailability = () => {
           ))}
         </div>
       </Card>
-
       <Button onClick={saveAvailability} fullWidth>
-        Save Availability
+        {mode === "edit"
+          ? "Update Availability"
+          : mode === "extend"
+            ? "Extend Availability"
+            : "Save Availability"}
       </Button>
     </div>
   );
