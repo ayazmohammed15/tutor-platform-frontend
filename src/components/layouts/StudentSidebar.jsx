@@ -82,10 +82,10 @@ const StudentSidebar = ({ isOpen, setIsOpen }) => {
         </nav>
 
         {/* Bottom Settings with Dropdown */}
-        <div className="p-4 mb-4 flex-shrink-0 border-t border-white/10 mt-2">
+        {/* <div className="p-4 mb-4 flex-shrink-0 border-t border-white/10 mt-2"> */}
           
           {/* Settings Toggle Button */}
-          <button
+          {/* <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
             className={`w-full flex items-center justify-between rounded-xl px-4 py-3.5 text-sm font-medium transition-all border-l-4 ${
               isSettingsOpen 
@@ -98,10 +98,10 @@ const StudentSidebar = ({ isOpen, setIsOpen }) => {
               Settings
             </div>
             <ChevronDown className={`w-4 h-4 transition-transform ${isSettingsOpen ? 'rotate-180 text-white' : 'text-slate-500'}`} />
-          </button>
+          </button> */}
 
           {/* Dropdown Options */}
-          {isSettingsOpen && (
+          {/* {isSettingsOpen && (
             <div className="mt-2 ml-4 pl-6 border-l border-white/10 space-y-1 animate-in slide-in-from-top-2 fade-in duration-200">
               {settingsOptions.map((option, index) => (
                 <div 
@@ -112,9 +112,9 @@ const StudentSidebar = ({ isOpen, setIsOpen }) => {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
 
-        </div>
+        {/* </div> */}
       </aside>
     </>
   );

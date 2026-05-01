@@ -31,6 +31,8 @@ import TutorPayments from './pages/tutor/TutorPayments';
 import TutorAvailability from './pages/tutor/TutorAvailability';
 import TutorRegistrationSuccess from "./components/common/TutorRegistrationSuccess";
 import StudentProfile from './pages/student/StudentProfile';
+import AboutUs from './pages/AboutUs';
+import HowItWorks from './pages/HowItWorks';
 
 function App() {
   return (
@@ -65,7 +67,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Home />} />
-
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
 
           <Route
             path="/student"

@@ -48,6 +48,11 @@ export const availabilityService = {
     return response.data;
   },
 
+  saveAvailability: async (availabilityData) => {
+    const response = await api.post('/availability/save', availabilityData);
+    return response.data;
+  },
+
   getMySlots: async () => {
     const response = await api.get('/availability/my-slots');
     return response.data;

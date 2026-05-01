@@ -220,7 +220,7 @@ const StudentDashboard = () => {
   const tutorResults = Array.isArray(tutors) ? tutors : [];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 ">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 mt-9">
 
 
       {/* ================= FILTER CARD ================= */}
@@ -230,7 +230,7 @@ const StudentDashboard = () => {
           <h2 className="text-lg font-bold">Search Parameters</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           <Select
             label="Course"
             name="course_id"
@@ -274,6 +274,7 @@ const StudentDashboard = () => {
             }}
             options={chapters.map((c) => ({ value: c.id, label: c.chapter_name }))}
             disabled={!filters.subject_id}
+            placeholder="Select chapter..."
           />
         </div>
 

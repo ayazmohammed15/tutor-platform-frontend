@@ -21,6 +21,7 @@ const TutorProfile = () => {
   const [tutor, setTutor] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [availabilityRange, setAvailabilityRange] = useState(null);
   //   const [selectedClassId, setSelectedClassId] = useState(class_id || null);
   // const [selectedCourseId, setSelectedCourseId] = useState(course_id || null);
   const selectedClassId = Number(class_id);
@@ -45,6 +46,8 @@ const TutorProfile = () => {
     }
   }, []);
 
+
+
   const fetchTutorData = async () => {
     try {
       const [tutorRes, availabilityRes] = await Promise.all([
@@ -54,6 +57,10 @@ const TutorProfile = () => {
 
       setTutor(tutorRes.data.tutor);
       setAvailability(availabilityRes.data.slots);
+
+      // ✅ ADD THIS
+      setAvailabilityRange(availabilityRes.data.availability_range);
+
     } catch (error) {
       console.error('Error fetching tutor data:', error);
       toast.error('Failed to load tutor details');
@@ -161,6 +168,28 @@ const TutorProfile = () => {
     return acc;
   }, {});
 
+
+  const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('hi-IN'); // DD/MM/YYYY
+};
+
+
+  const getDaysLabel = (slots) => {
+    const uniqueDays = [...new Set(slots.map(s => s.day_of_week))];
+
+    if (uniqueDays.length === 7) return "Mon - Sun";
+
+    return uniqueDays.join(", ");
+  };
+
+  const getCommonTimeString = (slots) => {
+    const uniqueTimes = [...new Set(
+      slots.map(s => `${s.start_time.slice(0, 5)} - ${s.end_time.slice(0, 5)}`)
+    )];
+
+    return uniqueTimes.join(", ");
+  };
   return (
     <div>
       <Button
@@ -211,33 +240,35 @@ const TutorProfile = () => {
             </div>
           </Card>
 
-          <Card>
+          <Card className="p-6">
             <h2 className="text-2xl font-semibold mb-4">Availability Calendar</h2>
 
             {availability.length === 0 ? (
               <p className="text-gray-600">No availability slots set by tutor</p>
             ) : (
-              <div className="space-y-4">
-                {dayOrder.map((day) => {
-                  const slots = groupedAvailability[day];
-                  if (!slots) return null;
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 
-                  return (
-                    <div key={day} className="border-b pb-3 last:border-b-0">
-                      <h4 className="font-semibold text-gray-900 mb-2">{day}</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {slots.map((slot) => (
-                          <div
-                            key={slot.id}
-                            className="bg-blue-50 text-blue-700 px-3 py-1 rounded text-sm"
-                          >
-                            {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {availabilityRange
+                        ? `${formatDate(availabilityRange.start_date)} → ${formatDate(availabilityRange.end_date)}`
+                        : getDaysLabel(availability)}
+                    </p>
+
+                    {availabilityRange && (
+                      <p className="text-xs text-slate-500">
+                        {getDaysLabel(availability)}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* RIGHT SIDE → Time */}
+                  <p className="text-sm text-slate-700">
+                    {getCommonTimeString(availability)}
+                  </p>
+
+                </div>
               </div>
             )}
           </Card>
@@ -300,7 +331,8 @@ const TutorProfile = () => {
                             </div>
                           )}
                         </button>
-                    )})
+                      )
+                    })
                   )}
                 </div>
               )}

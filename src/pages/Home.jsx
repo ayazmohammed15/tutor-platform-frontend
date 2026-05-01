@@ -52,8 +52,8 @@ const Home = () => {
         <div className="text-2xl font-bold tracking-tight">TutorBook</div>
         <div className="hidden md:flex space-x-8 font-medium text-sm text-gray-700">
           <a href="/register" className="hover:text-blue-600">Find a Tutor</a>
-          <a href="#" className="hover:text-blue-600">About Us</a>
-          <a href="#" className="hover:text-blue-600">How it Works</a>
+          <Link to="/about-us" className="hover:text-blue-600">About Us</Link>
+          <Link to="/how-it-works" className="hover:text-blue-600">How it Works</Link>
           <a href="#" className="hover:text-blue-600"></a>
         </div>
         <div className="flex items-center space-x-6">
@@ -170,7 +170,11 @@ const Home = () => {
                 ))}
               </ul>
 
-              <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700">
+              <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700"
+              onClick={(e) => {
+                  navigate("/register")
+                }}
+              >
                 Find a Tutor
               </button>
             </div>
@@ -372,7 +376,11 @@ const Home = () => {
           <div>
             <h4 className="font-semibold mb-6">Quick Link</h4>
             <ul className="space-y-4 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Find a Tutor</a></li>
+              <li><a href="#" className="hover:text-white transition-colors"
+              onClick={(e) => {
+                  navigate("/register")
+                }}
+              >Find a Tutor</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Become a Tutor</a></li>
               <li><a href="#" className="hover:text-white transition-colors">How it works</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
