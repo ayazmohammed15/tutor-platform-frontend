@@ -30,14 +30,16 @@ api.interceptors.response.use(
   (error) => {
     const requestUrl = error.config?.url || '';
     const isLoginRequest = requestUrl.includes('/auth/login');
+    const skipAuthRedirect = error.config?.skipAuthRedirect;
+    const suppressGlobalError = error.config?.suppressGlobalError;
 
-    if (error.response?.status === 401 && !isLoginRequest) {
+    if (error.response?.status === 401 && !isLoginRequest && !skipAuthRedirect) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
 
-    if (!isLoginRequest) {
+    if (!isLoginRequest && !suppressGlobalError) {
       const message = error.response?.data?.message || 'An error occurred';
       toast.error(message);
     }

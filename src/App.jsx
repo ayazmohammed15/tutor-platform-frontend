@@ -2,8 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import Layout from './components/common/Layout';
-import RoleLayout from './components/common/RoleLayout';
 import RolePlaceholder from './components/common/RolePlaceholder';
 
 import Home from './pages/Home';
@@ -33,6 +31,7 @@ import TutorRegistrationSuccess from "./components/common/TutorRegistrationSucce
 import StudentProfile from './pages/student/StudentProfile';
 import AboutUs from './pages/AboutUs';
 import HowItWorks from './pages/HowItWorks';
+import GoogleConnected from './pages/tutor/GoogleConnected';
 
 function App() {
   return (
@@ -116,6 +115,7 @@ function App() {
             <Route path="assignments" element={<TutorAssignments />} />
             <Route path="payments" element={<TutorPayments />} />
             <Route path="profile" element={<TutorsProfile />} />
+            <Route path="google-connected" element={<GoogleConnected />} />
           </Route>
 
           {/* ================= ADMIN ROUTES ================= */}

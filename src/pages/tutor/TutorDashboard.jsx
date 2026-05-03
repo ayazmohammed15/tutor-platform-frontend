@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { sessionService } from '../../services/sessionService';
-import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
-import TutorAvailability from './TutorAvailability';
-import { Calendar as CalendarIcon, Clock, Users, ArrowUpRight, MoreHorizontal } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ArrowUpRight, MoreHorizontal } from 'lucide-react';
+import GoogleCalendarConnect from '../../components/GoogleCalendarConnect';
 
 const TutorDashboard = () => {
   /* ================= STATE ================= */
@@ -142,6 +140,8 @@ const TutorDashboard = () => {
           <p className="text-xs text-gray-400 mt-2">in August 2026</p>
         </div>
       </div>
+
+      <GoogleCalendarConnect />
 
       {/* ================= REQUESTS SECTION ================= */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mt-8">
