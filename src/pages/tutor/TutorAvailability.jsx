@@ -56,8 +56,24 @@ const TutorAvailability = () => {
 
           // time (take first slot)
           if (data.slots.length > 0) {
-            setStartTime(data.slots[0].start_time.slice(0, 5));
-            setEndTime(data.slots[0].end_time.slice(0, 5));
+            const daySlots = data.slots.filter(
+              s => s.day_of_week === data.slots[0].day_of_week
+            );
+
+            // earliest start
+            const start = daySlots[0].start_time.slice(0, 5);
+
+            // latest end
+            const end = daySlots[daySlots.length - 1].end_time.slice(0, 5);
+
+            setStartTime(start);
+            setEndTime(end);
+
+            // detect break
+            if (daySlots.length > 1) {
+              setBreakStart(daySlots[0].end_time.slice(0, 5));
+              setBreakEnd(daySlots[1].start_time.slice(0, 5));
+            }
           }
         }
 
