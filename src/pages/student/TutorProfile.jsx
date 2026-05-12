@@ -1,32 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { tutorService } from '../../services/tutorService';
-import { availabilityService } from '../../services/sessionService';
-import { sessionService } from '../../services/sessionService';
+import { availabilityService, sessionService } from '../../services/sessionService';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
-import { useLocation } from 'react-router-dom';
 
 const TutorProfile = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const subject_id = location.state?.subject_id;
-  const class_id = location.state?.class_id;
-  const course_id = location.state?.course_id;
-  // const chapter_ids = location.state?.chapter_ids || [];
+  const parsedSubjectId = Number(subject_id);
   const [tutor, setTutor] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
   const [availabilityRange, setAvailabilityRange] = useState(null);
-  //   const [selectedClassId, setSelectedClassId] = useState(class_id || null);
-  // const [selectedCourseId, setSelectedCourseId] = useState(course_id || null);
-  const selectedClassId = Number(class_id);
-  const selectedCourseId = Number(course_id);
-  const parsedSubjectId = Number(subject_id);
   const [slots, setSlots] = useState([]);
   const [bookingData, setBookingData] = useState({
     requested_date: '',
@@ -36,49 +27,46 @@ const TutorProfile = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    const fetchTutorData = async () => {
+      try {
+        const [tutorRes, availabilityRes] = await Promise.all([
+          tutorService.getTutorDetails(tutorId),
+          availabilityService.getTutorSlots(tutorId),
+        ]);
+
+        setTutor(tutorRes.data.tutor);
+        setAvailability(availabilityRes.data.slots);
+        setAvailabilityRange(availabilityRes.data.availability_range);
+      } catch (error) {
+        console.error('Error fetching tutor data:', error);
+        toast.error('Failed to load tutor details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchTutorData();
   }, [tutorId]);
 
   useEffect(() => {
-    if (!subject_id || !class_id || !course_id) {
-      toast.error("Missing booking data. Please search again.");
-      navigate("/student/dashboard");
+    if (!subject_id) {
+      toast.error('Missing booking data. Please search again.');
+      navigate('/student/dashboard');
     }
-  }, []);
+  }, [navigate, subject_id]);
 
+  const handleDateChange = async (event) => {
+    const selectedDate = event.target.value;
 
-
-  const fetchTutorData = async () => {
-    try {
-      const [tutorRes, availabilityRes] = await Promise.all([
-        tutorService.getTutorDetails(tutorId),
-        availabilityService.getTutorSlots(tutorId),
-      ]);
-
-      setTutor(tutorRes.data.tutor);
-      setAvailability(availabilityRes.data.slots);
-
-      // ✅ ADD THIS
-      setAvailabilityRange(availabilityRes.data.availability_range);
-
-    } catch (error) {
-      console.error('Error fetching tutor data:', error);
-      toast.error('Failed to load tutor details');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDateChange = async (e) => {
-    const selectedDate = e.target.value;
-
-    setBookingData(prev => ({
+    setBookingData((prev) => ({
       ...prev,
       requested_date: selectedDate,
-      requested_time: ''
+      requested_time: '',
     }));
 
-    if (!selectedDate) return;
+    if (!selectedDate) {
+      return;
+    }
 
     try {
       const res = await availabilityService.getAvailableSlotsByDate(
@@ -86,24 +74,22 @@ const TutorProfile = () => {
         selectedDate
       );
 
-      console.log("API RESPONSE:", res); // check this once
-
       setSlots(res.data.slots || []);
     } catch (error) {
-      console.error("Error fetching slots:", error);
+      console.error('Error fetching slots:', error);
       setSlots([]);
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (event) => {
     setBookingData({
       ...bookingData,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const handleBooking = async (e) => {
-    e.preventDefault();
+  const handleBooking = async (event) => {
+    event.preventDefault();
 
     if (!Number.isFinite(parsedSubjectId) || parsedSubjectId <= 0) {
       toast.error('Please select a subject before booking a session');
@@ -119,10 +105,8 @@ const TutorProfile = () => {
 
     try {
       const requestData = {
-        tutor_id: parseInt(tutorId),
+        tutor_id: parseInt(tutorId, 10),
         subject_id: parsedSubjectId,
-        class_id: selectedClassId,     // ✅ ADD
-        course_id: selectedCourseId,   // ✅ ADD
         requested_date: bookingData.requested_date,
         requested_time: bookingData.requested_time,
         notes: bookingData.notes,
@@ -133,12 +117,7 @@ const TutorProfile = () => {
       navigate('/student/sessions');
     } catch (error) {
       console.error('Booking error:', error);
-      alert(
-        error?.response?.data?.message || 'Booking failed'
-      );
-      toast.error(
-        error?.response?.data?.message || 'Booking failed'
-      );
+      toast.error(error?.response?.data?.message || 'Booking failed');
     } finally {
       setSubmitting(false);
     }
@@ -159,37 +138,33 @@ const TutorProfile = () => {
     );
   }
 
-  const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const groupedAvailability = availability.reduce((acc, slot) => {
-    if (!acc[slot.day_of_week]) {
-      acc[slot.day_of_week] = [];
-    }
-    acc[slot.day_of_week].push(slot);
-    return acc;
-  }, {});
-
-
   const formatDate = (dateStr) => {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('hi-IN'); // DD/MM/YYYY
-};
-
-
-  const getDaysLabel = (slots) => {
-    const uniqueDays = [...new Set(slots.map(s => s.day_of_week))];
-
-    if (uniqueDays.length === 7) return "Mon - Sun";
-
-    return uniqueDays.join(", ");
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('hi-IN');
   };
 
-  const getCommonTimeString = (slots) => {
-    const uniqueTimes = [...new Set(
-      slots.map(s => `${s.start_time.slice(0, 5)} - ${s.end_time.slice(0, 5)}`)
-    )];
+  const getDaysLabel = (availabilitySlots) => {
+    const uniqueDays = [...new Set(availabilitySlots.map((slot) => slot.day_of_week))];
 
-    return uniqueTimes.join(", ");
+    if (uniqueDays.length === 7) {
+      return 'Mon - Sun';
+    }
+
+    return uniqueDays.join(', ');
   };
+
+  const getCommonTimeString = (availabilitySlots) => {
+    const uniqueTimes = [
+      ...new Set(
+        availabilitySlots.map(
+          (slot) => `${slot.start_time.slice(0, 5)} - ${slot.end_time.slice(0, 5)}`
+        )
+      ),
+    ];
+
+    return uniqueTimes.join(', ');
+  };
+
   return (
     <div>
       <Button
@@ -197,7 +172,7 @@ const TutorProfile = () => {
         onClick={() => navigate('/student/dashboard')}
         className="mb-6"
       >
-        ← Back to Search
+        Back to Search
       </Button>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -220,7 +195,7 @@ const TutorProfile = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Hourly Rate</p>
-                <p className="text-lg font-semibold text-blue-600">₹{tutor.hourly_rate}</p>
+                <p className="text-lg font-semibold text-blue-600">Rs {tutor.hourly_rate}</p>
               </div>
             </div>
 
@@ -248,26 +223,19 @@ const TutorProfile = () => {
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-
                   <div>
                     <p className="text-sm font-semibold text-slate-900">
                       {availabilityRange
-                        ? `${formatDate(availabilityRange.start_date)} → ${formatDate(availabilityRange.end_date)}`
+                        ? `${formatDate(availabilityRange.start_date)} to ${formatDate(availabilityRange.end_date)}`
                         : getDaysLabel(availability)}
                     </p>
 
                     {availabilityRange && (
-                      <p className="text-xs text-slate-500">
-                        {getDaysLabel(availability)}
-                      </p>
+                      <p className="text-xs text-slate-500">{getDaysLabel(availability)}</p>
                     )}
                   </div>
 
-                  {/* RIGHT SIDE → Time */}
-                  <p className="text-sm text-slate-700">
-                    {getCommonTimeString(availability)}
-                  </p>
-
+                  <p className="text-sm text-slate-700">{getCommonTimeString(availability)}</p>
                 </div>
               </div>
             )}
@@ -292,15 +260,14 @@ const TutorProfile = () => {
               {bookingData.requested_date && (
                 <div className="grid grid-cols-3 gap-2 mt-3">
                   {slots.length === 0 ? (
-                    <p className="text-sm text-gray-500 col-span-3">
-                      No slots available
-                    </p>
+                    <p className="text-sm text-gray-500 col-span-3">No slots available</p>
                   ) : (
                     slots.map((slot) => {
-                      const slotTime = slot.time || slot.start_time?.slice(0, 5) || "";
-                      const hasSeats = slot.available_seats === undefined || Number(slot.available_seats) > 0;
+                      const slotTime = slot.time || slot.start_time?.slice(0, 5) || '';
+                      const hasSeats =
+                        slot.available_seats === undefined || Number(slot.available_seats) > 0;
                       const isSelectable =
-                        typeof slot.is_selectable === "boolean"
+                        typeof slot.is_selectable === 'boolean'
                           ? slot.is_selectable
                           : !slot.booked && hasSeats;
 
@@ -310,28 +277,25 @@ const TutorProfile = () => {
                           type="button"
                           disabled={!isSelectable}
                           onClick={() =>
-                            setBookingData(prev => ({
+                            setBookingData((prev) => ({
                               ...prev,
-                              requested_time: slotTime
+                              requested_time: slotTime,
                             }))
                           }
-                          className={`px-3 py-2 rounded border text-sm
-    ${!isSelectable
-                              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          className={`px-3 py-2 rounded border text-sm ${
+                            !isSelectable
+                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                               : bookingData.requested_time === slotTime
-                                ? "bg-blue-600 text-white"
-                                : "bg-white hover:bg-blue-50"
-                            }
-  `}
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white hover:bg-blue-50'
+                          }`}
                         >
                           {slotTime}
                           {slot.available_seats !== undefined && (
-                            <div className="text-xs">
-                              {slot.available_seats} left
-                            </div>
+                            <div className="text-xs">{slot.available_seats} left</div>
                           )}
                         </button>
-                      )
+                      );
                     })
                   )}
                 </div>

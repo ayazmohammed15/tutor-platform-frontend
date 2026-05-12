@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate,useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { extractAuthUser } from '../../services/authService';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
@@ -37,7 +38,8 @@ const Login = () => {
       if (response?.success) {
         toast.success('Login successful!');
 
-        const role = response.data.user.role;
+        const loggedInUser = extractAuthUser(response);
+        const role = loggedInUser?.role;
         if (role === 'student') {
           navigate('/student/dashboard');
         } else if (role === 'tutor') {

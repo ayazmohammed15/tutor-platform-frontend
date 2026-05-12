@@ -19,8 +19,6 @@ export const tutorService = {
  searchTutors: async (filters = {}) => {
   const params = new URLSearchParams();
 
-  if (filters.course_id) params.append('course_id', filters.course_id);
-  if (filters.class_id) params.append('class_id', filters.class_id);
   if (filters.subject_id) params.append('subject_id', filters.subject_id);
   if (filters.chapter_id) params.append('chapter_id', filters.chapter_id);
 

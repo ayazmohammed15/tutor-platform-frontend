@@ -7,6 +7,8 @@ import RolePlaceholder from './components/common/RolePlaceholder';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/student/Register';
+import SchoolRegister from './pages/student/SchoolRegister';
+import EngineeringRegister from './pages/student/EngineeringRegister';
 import StudentDashboard from './pages/student/StudentDashboard';
 import TutorProfile from './pages/student/TutorProfile';
 import StudentSessions from './pages/student/StudentSessions';
@@ -65,6 +67,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/register/school" element={<SchoolRegister />} />
+          <Route path="/register/engineering" element={<EngineeringRegister />} />
           <Route path="/" element={<Home />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
@@ -140,8 +144,6 @@ function App() {
           </Route>
           <Route path="/set-password" element={<SetPassword />} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
           <Route path="/tutor-register" element={<TutorRegister />} />
 
           <Route

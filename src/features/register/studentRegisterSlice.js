@@ -1,15 +1,25 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../api/api";
+import { authService } from "../../services/authService";
 
 export const registerStudent = createAsyncThunk(
   "studentRegister",
-  async (data, { rejectWithValue }) => {
+  async ({ category, payload }, { rejectWithValue }) => {
     try {
-      const res = await api.post("/auth/register/student", data);
-      return res.data;
+      if (category === "school") {
+        return await authService.registerSchoolStudent(payload);
+      }
+
+      if (category === "engineering") {
+        return await authService.registerEngineeringStudent(payload);
+      }
+
+      return await authService.register(payload);
     } catch (error) {
+      const responseData = error.response?.data;
       return rejectWithValue(
-        error.response?.data || "Student registration failed"
+        responseData?.message ||
+          responseData?.error ||
+          (typeof responseData === "string" ? responseData : "Student registration failed")
       );
     }
   }

@@ -1,16 +1,66 @@
 import api from './api';
 
+const extractAuthUser = (payload) => {
+  if (payload?.data?.user) {
+    return payload.data.user;
+  }
+
+  if (payload?.user) {
+    return payload.user;
+  }
+
+  if (payload?.data?.role) {
+    return payload.data;
+  }
+
+  if (payload?.role) {
+    return payload;
+  }
+
+  return null;
+};
+
+const extractAuthToken = (payload) => {
+  if (payload?.data?.token) {
+    return payload.data.token;
+  }
+
+  if (payload?.token) {
+    return payload.token;
+  }
+
+  return null;
+};
+
 export const authService = {
   register: async (userData) => {
     const response = await api.post('/auth/register', userData);
     return response.data;
   },
 
+  registerSchoolStudent: async (userData) => {
+    const response = await api.post('/auth/register/school', userData);
+    return response.data;
+  },
+
+  registerEngineeringStudent: async (userData) => {
+    const response = await api.post('/auth/register/engineering', userData);
+    return response.data;
+  },
+
   login: async (credentials) => {
     const response = await api.post('/auth/login', credentials);
     if (response.data.success) {
-      localStorage.setItem('token', response.data.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.data.user));
+      const user = extractAuthUser(response.data);
+      const token = extractAuthToken(response.data);
+
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
     }
     return response.data;
   },
@@ -43,3 +93,5 @@ export const authService = {
     return !!localStorage.getItem('token');
   },
 };
+
+export { extractAuthUser };

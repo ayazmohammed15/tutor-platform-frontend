@@ -1,68 +1,38 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Search, Star, Clock } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import { tutorService } from "../../services/tutorService";
-// import { boardService } from "../../services/boardService";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Select from "../../components/common/Select";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import toast from "react-hot-toast";
-import { Search, BookOpen, Star, Clock } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-
-import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCourses,
   fetchClasses,
-  fetchSubjectsByCourse
+  fetchSubjectsByCourse,
 } from "../../features/register/registerSlice";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  console.log("Authenticated user:", user);
-
   const dispatch = useDispatch();
+  const { user } = useAuth();
+  const { courses, subjects, classes } = useSelector((state) => state.register);
 
-  const { courses, subjects, classes } = useSelector(
-    (state) => state.register
-  );
-
-  /* ================= STATE ================= */
-  // ... (Keep ALL your existing state variables here exactly as they are)
-  // const [courses, setCourses] = useState([]);
-  // const [boards, setBoards] = useState([]);
-  // const [classes, setClasses] = useState([]);
-  // const [subjects, setSubjects] = useState([]);
-  const [chapters, setChapters] = useState([]);
-
+  const [chapters] = useState([]);
   const [filters, setFilters] = useState({
     course_id: "",
     class_id: "",
     subject_id: "",
-    chapter_ids: []
+    chapter_ids: [],
   });
-
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-
-    setFilters({
-      course_id: user.course_id || "",
-      class_id: user.class_id || "",
-      subject_id: user.subject_id || "",
-      chapter_ids: []
-    });
-  }, [user]);
-
-  useEffect(() => {
-    if (filters.course_id && filters.class_id) {
-      handleSearch();
-    }
-  }, [filters.course_id, filters.class_id]);
+  const studentCategory = user?.student_category || "general";
+  const requiresClassSelection = studentCategory !== "engineering";
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -70,101 +40,74 @@ const StudentDashboard = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (filters.course_id) {
-      dispatch(fetchSubjectsByCourse(filters.course_id));
+    if (!user) {
+      return;
     }
-  }, [filters.course_id, dispatch]);
-  /* ================= LOAD BOARDS ================= */
-  // useEffect(() => {
-  //   const loadBoards = async () => {
-  //     try {
-  //       const data = await boardService.getBoards();
-  //       setBoards(data);
-  //     } catch (err) {
-  //       toast.error("Failed to load boards");
-  //     }
-  //   };
-  //   loadBoards();
-  // }, []);
 
-  /* ================= LOAD CLASSES ================= */
-  // useEffect(() => {
-  //   if (!filters.board_id) return;
+    setFilters({
+      course_id: user.course_id || "",
+      class_id: user.class_id || "",
+      subject_id: "",
+      chapter_ids: [],
+    });
+  }, [user]);
 
-  //   const loadClasses = async () => {
-  //     try {
-  //       const data = await boardService.getClassesByBoard(filters.board_id);
-  //       setClasses(data);
-  //     } catch (err) {
-  //       toast.error("Failed to load classes");
-  //     }
-  //   };
+  useEffect(() => {
+    if (!user?.course_id) {
+      return;
+    }
 
-  //   loadClasses();
-  // }, [filters.board_id]);
+    dispatch(fetchSubjectsByCourse(user.course_id));
+  }, [dispatch, user?.course_id]);
 
-  /* ================= LOAD SUBJECTS ================= */
-  // useEffect(() => {
-  //   if (!filters.board_id || !filters.class_id) return;
+  useEffect(() => {
+    if (!user?.course_id) {
+      return;
+    }
 
-  //   const loadSubjects = async () => {
-  //     try {
-  //       const data = await boardService.getSubjectsByClasses(
-  //         filters.board_id,
-  //         [filters.class_id]   // send as array
-  //       );
-  //       setSubjects(data);
-  //     } catch (err) {
-  //       toast.error("Failed to load subjects");
-  //     }
-  //   };
+    if (requiresClassSelection && !user?.class_id) {
+      return;
+    }
 
-  //   loadSubjects();
-  // }, [filters.board_id, filters.class_id]);
+    const autoSearchTutors = async () => {
+      setLoading(true);
+      setSearched(true);
 
-  // useEffect(() => {
-  //   if (!filters.subject_id) return;
+      try {
+        const res = await tutorService.searchTutors();
+        const tutorsList = res?.data?.tutors || [];
+        setTutors(tutorsList);
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong while loading tutors");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   const loadChapters = async () => {
-  //     try {
-  //       const data = await boardService.getChaptersBySubject(
-  //         filters.subject_id
-  //       );
-  //       setChapters(data);
-  //     } catch (err) {
-  //       toast.error("Failed to load chapters");
-  //     }
-  //   };
+    autoSearchTutors();
+  }, [requiresClassSelection, user?.class_id, user?.course_id]);
 
-  //   loadChapters();
-  // }, [filters.subject_id]);
-
-  /* ================= HANDLE CHANGE ================= */
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
     setFilters((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "course_id" && {
-        subject_id: "",
-        class_id: "",
-        chapter_ids: []
-      }),
-      ...(name === "class_id" && {
-        subject_id: "",
-        chapter_ids: []
-      }),
       ...(name === "subject_id" && {
-        chapter_ids: []
-      })
+        chapter_ids: [],
+      }),
     }));
   };
 
-  /* ================= SEARCH TUTORS ================= */
   const handleSearch = async () => {
-    if (!filters.course_id || !filters.class_id) {
-      toast.error("Please select Course and Class");
+    if (!user?.course_id) {
+      toast.error("Your account is missing course details");
+      return;
+    }
+
+    if (requiresClassSelection && !user?.class_id) {
+      toast.error("Your account is missing class details");
       return;
     }
 
@@ -172,29 +115,20 @@ const StudentDashboard = () => {
     setSearched(true);
 
     try {
-      console.log("Search filters:", filters);
-
       const res = await tutorService.searchTutors({
-        course_id: filters.course_id,
-        class_id: filters.class_id,
-        subject_id: filters.subject_id || undefined
+        subject_id: filters.subject_id || undefined,
       });
 
       const tutorsList = res?.data?.tutors || [];
-
-      console.log("Tutors response:", tutorsList);
-
       setTutors(tutorsList);
 
       if (tutorsList.length === 0) {
-        toast("No tutors found for selected subject");
+        toast("No tutors found for the selected filters");
       } else {
         toast.success(`Found ${tutorsList.length} tutor(s)`);
       }
-
-    } catch (err) {
-      console.error(err);
-      console.log(err.response?.data);
+    } catch (error) {
+      console.error(error);
       toast.error("Something went wrong while searching");
     } finally {
       setLoading(false);
@@ -209,11 +143,8 @@ const StudentDashboard = () => {
 
     navigate(`/student/tutor/${id}`, {
       state: {
-  subject_id: filters.subject_id,
-  class_id: filters.class_id,       // ✅ ADD
-  course_id: filters.course_id,     // ✅ ADD
-  // chapter_ids: filters.chapter_id
-}
+        subject_id: filters.subject_id,
+      },
     });
   };
 
@@ -221,13 +152,14 @@ const StudentDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 mt-9">
-
-
-      {/* ================= FILTER CARD ================= */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 -mt-12 relative z-20 mx-4 sm:mx-8">
         <div className="flex items-center gap-2 mb-6 text-gray-800">
           <Search className="w-5 h-5 text-indigo-600" />
           <h2 className="text-lg font-bold">Search Parameters</h2>
+        </div>
+
+        <div className="mb-5 rounded-2xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+          Your course and class are locked to your student profile so tutor matching stays aligned with backend rules.
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -236,11 +168,12 @@ const StudentDashboard = () => {
             name="course_id"
             value={filters.course_id}
             onChange={handleChange}
-            options={courses.map((c) => ({
-              value: c.id,
-              label: c.course_name
+            options={courses.map((course) => ({
+              value: course.id,
+              label: course.course_name,
             }))}
-            placeholder="Select course..."
+            disabled
+            placeholder="Assigned course"
           />
 
           <Select
@@ -248,31 +181,42 @@ const StudentDashboard = () => {
             name="class_id"
             value={filters.class_id}
             onChange={handleChange}
-            options={classes.map((c) => ({ value: c.id, label: c.class_name }))}
-            disabled={!filters.course_id}
-            placeholder="Select class..." 
+            options={classes.map((item) => ({
+              value: item.id,
+              label: item.class_name,
+            }))}
+            disabled
+            placeholder="Assigned class"
           />
+
           <Select
             label="Subject"
             name="subject_id"
             value={filters.subject_id}
             onChange={handleChange}
-            options={subjects.map((s) => ({ value: s.id, label: s.subject_name }))}
-            disabled={!filters.course_id}
+            options={subjects.map((subject) => ({
+              value: subject.id,
+              label: subject.subject_name,
+            }))}
+            disabled={!user?.course_id}
             placeholder="Select subject..."
           />
+
           <Select
             label="Chapters (Optional)"
             name="chapter_ids"
             value={filters.chapter_ids?.[0] || ""}
-            onChange={(e) => {
-              const selectedChapterId = e.target.value;
+            onChange={(event) => {
+              const selectedChapterId = event.target.value;
               setFilters((prev) => ({
                 ...prev,
-                chapter_ids: selectedChapterId ? [selectedChapterId] : []
+                chapter_ids: selectedChapterId ? [selectedChapterId] : [],
               }));
             }}
-            options={chapters.map((c) => ({ value: c.id, label: c.chapter_name }))}
+            options={chapters.map((chapter) => ({
+              value: chapter.id,
+              label: chapter.chapter_name,
+            }))}
             disabled={!filters.subject_id}
             placeholder="Select chapter..."
           />
@@ -299,7 +243,6 @@ const StudentDashboard = () => {
         </div>
       </div>
 
-      {/* ================= LOADING ================= */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 text-indigo-600">
           <LoadingSpinner size="lg" />
@@ -307,7 +250,6 @@ const StudentDashboard = () => {
         </div>
       )}
 
-      {/* ================= RESULTS ================= */}
       {!loading && searched && (
         <div className="animate-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-6">
@@ -330,7 +272,6 @@ const StudentDashboard = () => {
               >
                 <div className="p-6 flex-1">
                   <div className="flex items-start gap-4">
-                    {/* Fake Avatar - Replace with tutor.profile_image if you have it */}
                     <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-100 to-blue-50 flex items-center justify-center text-indigo-600 font-bold text-xl flex-shrink-0 ring-4 ring-white shadow-sm">
                       {(tutor?.first_name?.[0] || "")}
                       {(tutor?.last_name?.[0] || "")}
@@ -357,9 +298,7 @@ const StudentDashboard = () => {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Hourly Rate</p>
-                      <p className="font-bold text-indigo-600">
-                        ₹{tutor.hourly_rate}/hr
-                      </p>
+                      <p className="font-bold text-indigo-600">Rs {tutor.hourly_rate}/hr</p>
                     </div>
                   </div>
                 </div>
@@ -368,8 +307,8 @@ const StudentDashboard = () => {
                   <Button
                     variant="outline"
                     fullWidth
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent card click if they click the button directly
+                    onClick={(event) => {
+                      event.stopPropagation();
                       handleTutorClick(tutor.user_id);
                     }}
                     className="border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-colors rounded-xl"

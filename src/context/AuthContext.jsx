@@ -1,6 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
-import { authService } from '../services/authService';
+import { authService, extractAuthUser } from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -22,7 +23,7 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const response = await authService.getProfile();
-        const profileUser = response?.data?.user || response?.data || response?.user;
+        const profileUser = extractAuthUser(response);
 
         if (profileUser) {
           setUser(profileUser);
@@ -40,16 +41,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const response = await authService.login(credentials);
-    if (response.success) {
-      setUser(response.data.user);
+    const loggedInUser = extractAuthUser(response);
+
+    if (response.success && loggedInUser) {
+      setUser(loggedInUser);
     }
     return response;
   };
 
   const register = async (userData) => {
     const response = await authService.register(userData);
-    if (response.success) {
-      setUser(response.data.user);
+    const registeredUser = extractAuthUser(response);
+
+    if (response.success && registeredUser) {
+      setUser(registeredUser);
     }
     return response;
   };

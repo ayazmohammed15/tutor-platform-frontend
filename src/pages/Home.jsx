@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import RegistrationCategoryCards from '../components/register/RegistrationCategoryCards';
 
 
 const learningTabs = {
@@ -81,7 +82,7 @@ const Home = () => {
             </p>
             <div className="flex space-x-4">
               <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-md"
-                onClick={(e) => {
+                onClick={() => {
                   navigate("/register")
                 }}
               >
@@ -105,6 +106,19 @@ const Home = () => {
               {[...Array()].map((_, i) => <div key={i} className="w-1.5 h-1.5 bg-gray-900 rounded-full"></div>)}
             </div> */}
           </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-20">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="mb-10 text-center">
+            <h2 className="text-4xl font-bold text-gray-900">Choose Your Learning Path</h2>
+            <p className="mt-4 text-gray-600">
+              Pick the student category that fits best and continue with a tailored registration flow.
+            </p>
+          </div>
+
+          <RegistrationCategoryCards compact />
         </div>
       </section>
 
@@ -171,7 +185,7 @@ const Home = () => {
               </ul>
 
               <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700"
-              onClick={(e) => {
+              onClick={() => {
                   navigate("/register")
                 }}
               >
@@ -377,7 +391,7 @@ const Home = () => {
             <h4 className="font-semibold mb-6">Quick Link</h4>
             <ul className="space-y-4 text-sm text-gray-400">
               <li><a href="#" className="hover:text-white transition-colors"
-              onClick={(e) => {
+              onClick={() => {
                   navigate("/register")
                 }}
               >Find a Tutor</a></li>
