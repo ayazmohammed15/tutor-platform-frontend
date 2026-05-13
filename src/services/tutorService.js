@@ -16,15 +16,16 @@ export const tutorService = {
     return response.data;
   },
 
- searchTutors: async (filters = {}) => {
-  const params = new URLSearchParams();
+  searchTutors: async (filters = {}) => {
+    const params = new URLSearchParams();
 
-  if (filters.subject_id) params.append('subject_id', filters.subject_id);
-  if (filters.chapter_id) params.append('chapter_id', filters.chapter_id);
+    if (filters.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters.chapter_id) params.append('chapter_id', filters.chapter_id);
 
-  const response = await api.get(`/tutors/search?${params.toString()}`);
-  return response.data;
-},
+    const query = params.toString();
+    const response = await api.get(query ? `/tutors/search?${query}` : '/tutors/search');
+    return response.data;
+  },
 
 
   getTutorDetails: async (tutorId) => {
@@ -55,9 +56,9 @@ export const tutorService = {
     api.post("/admin/send-tutor-invite", data),
 
   getStudents: async () => {
-  const res = await api.get("/admin/students");
-  return res.data;
-}
+    const res = await api.get("/admin/students");
+    return res.data;
+  }
 
   // getPendingTutors: () =>
   //   api.get("/admin/pending-tutors"),

@@ -31,8 +31,6 @@ const StudentDashboard = () => {
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const studentCategory = user?.student_category || "general";
-  const requiresClassSelection = studentCategory !== "engineering";
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -65,10 +63,6 @@ const StudentDashboard = () => {
       return;
     }
 
-    if (requiresClassSelection && !user?.class_id) {
-      return;
-    }
-
     const autoSearchTutors = async () => {
       setLoading(true);
       setSearched(true);
@@ -86,7 +80,7 @@ const StudentDashboard = () => {
     };
 
     autoSearchTutors();
-  }, [requiresClassSelection, user?.class_id, user?.course_id]);
+  }, [user?.course_id]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -103,11 +97,6 @@ const StudentDashboard = () => {
   const handleSearch = async () => {
     if (!user?.course_id) {
       toast.error("Your account is missing course details");
-      return;
-    }
-
-    if (requiresClassSelection && !user?.class_id) {
-      toast.error("Your account is missing class details");
       return;
     }
 
@@ -136,14 +125,9 @@ const StudentDashboard = () => {
   };
 
   const handleTutorClick = (id) => {
-    if (!filters.subject_id) {
-      toast.error("Please select a subject before viewing tutor details");
-      return;
-    }
-
     navigate(`/student/tutor/${id}`, {
       state: {
-        subject_id: filters.subject_id,
+        subject_id: filters.subject_id || undefined,
       },
     });
   };
@@ -159,7 +143,7 @@ const StudentDashboard = () => {
         </div>
 
         <div className="mb-5 rounded-2xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
-          Your course and class are locked to your student profile so tutor matching stays aligned with backend rules.
+          Your course stays aligned with your student profile, and subject can be used as an optional tutor filter.
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -199,7 +183,7 @@ const StudentDashboard = () => {
               label: subject.subject_name,
             }))}
             disabled={!user?.course_id}
-            placeholder="Select subject..."
+            placeholder="All subjects"
           />
 
           <Select

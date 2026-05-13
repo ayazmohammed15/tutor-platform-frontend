@@ -1,30 +1,46 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { tutorService } from '../../services/tutorService';
 import { availabilityService, sessionService } from '../../services/sessionService';
+import { fetchClasses, fetchSubjectsByCourse } from '../../features/register/registerSlice';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
+import Select from '../../components/common/Select';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 
 const TutorProfile = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const subject_id = location.state?.subject_id;
-  const parsedSubjectId = Number(subject_id);
+  const dispatch = useDispatch();
+  const { user } = useAuth();
+  const { subjects, classes } = useSelector((state) => state.register);
+  const subject_id = location.state?.subject_id || '';
   const [tutor, setTutor] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
   const [availabilityRange, setAvailabilityRange] = useState(null);
   const [slots, setSlots] = useState([]);
   const [bookingData, setBookingData] = useState({
+    subject_id,
     requested_date: '',
     requested_time: '',
     notes: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showClassMismatchConfirm, setShowClassMismatchConfirm] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchClasses());
+
+    if (user?.course_id) {
+      dispatch(fetchSubjectsByCourse(user.course_id));
+    }
+  }, [dispatch, user?.course_id]);
 
   useEffect(() => {
     const fetchTutorData = async () => {
@@ -49,11 +65,71 @@ const TutorProfile = () => {
   }, [tutorId]);
 
   useEffect(() => {
-    if (!subject_id) {
-      toast.error('Missing booking data. Please search again.');
-      navigate('/student/dashboard');
+    if (!tutor || subjects.length === 0) {
+      return;
     }
-  }, [navigate, subject_id]);
+
+    const normalizeSubjectName = (value) =>
+      String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+
+    const tutorSubjectValues = [
+      tutor.subject_name,
+      tutor.subjects,
+      tutor.subject,
+    ]
+      .filter(Boolean)
+      .flatMap((value) => String(value).split(/[,/|&]/))
+      .map(normalizeSubjectName)
+      .filter(Boolean);
+
+    const matchingSubjects = subjects.filter((subject) => {
+      const normalizedName = normalizeSubjectName(subject.subject_name);
+
+      return tutorSubjectValues.some(
+        (tutorSubject) =>
+          tutorSubject === normalizedName ||
+          tutorSubject.includes(normalizedName) ||
+          normalizedName.includes(tutorSubject)
+      );
+    });
+
+    if (matchingSubjects.length === 0 && tutor.subject_id) {
+      const fallbackMatch = subjects.find(
+        (subject) => String(subject.id) === String(tutor.subject_id)
+      );
+
+      if (fallbackMatch) {
+        setBookingData((prev) => ({
+          ...prev,
+          subject_id: String(fallbackMatch.id),
+        }));
+      }
+
+      return;
+    }
+
+    if (matchingSubjects.length === 0) {
+      return;
+    }
+
+    setBookingData((prev) => {
+      const hasValidSelection = matchingSubjects.some(
+        (subject) => String(subject.id) === String(prev.subject_id)
+      );
+
+      if (hasValidSelection) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        subject_id: String(matchingSubjects[0].id),
+      };
+    });
+  }, [subjects, tutor]);
 
   const handleDateChange = async (event) => {
     const selectedDate = event.target.value;
@@ -88,19 +164,7 @@ const TutorProfile = () => {
     });
   };
 
-  const handleBooking = async (event) => {
-    event.preventDefault();
-
-    if (!Number.isFinite(parsedSubjectId) || parsedSubjectId <= 0) {
-      toast.error('Please select a subject before booking a session');
-      return;
-    }
-
-    if (!bookingData.requested_time) {
-      toast.error('Please select a time slot');
-      return;
-    }
-
+  const submitBooking = async (parsedSubjectId) => {
     setSubmitting(true);
 
     try {
@@ -121,6 +185,29 @@ const TutorProfile = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleBooking = async (event) => {
+    event.preventDefault();
+
+    const parsedSubjectId = Number(bookingData.subject_id);
+
+    if (!Number.isFinite(parsedSubjectId) || parsedSubjectId <= 0) {
+      toast.error('Please choose a subject before booking a session');
+      return;
+    }
+
+    if (!bookingData.requested_time) {
+      toast.error('Please select a time slot');
+      return;
+    }
+
+    if (hasClassMismatch) {
+      setShowClassMismatchConfirm(true);
+      return;
+    }
+
+    await submitBooking(parsedSubjectId);
   };
 
   if (loading) {
@@ -164,6 +251,58 @@ const TutorProfile = () => {
 
     return uniqueTimes.join(', ');
   };
+
+  const normalizeSubjectName = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+
+  const tutorSubjectValues = [
+    tutor.subject_name,
+    tutor.subjects,
+    tutor.subject,
+  ]
+    .filter(Boolean)
+    .flatMap((value) => String(value).split(/[,/|&]/))
+    .map(normalizeSubjectName)
+    .filter(Boolean);
+
+  const matchedTutorSubjects = subjects.filter((subject) => {
+    const normalizedName = normalizeSubjectName(subject.subject_name);
+
+    if (tutorSubjectValues.length > 0) {
+      return tutorSubjectValues.some(
+        (tutorSubject) =>
+          tutorSubject === normalizedName ||
+          tutorSubject.includes(normalizedName) ||
+          normalizedName.includes(tutorSubject)
+      );
+    }
+
+    if (tutor.subject_id) {
+      return String(subject.id) === String(tutor.subject_id);
+    }
+
+    return false;
+  });
+
+  const bookingSubjectOptions = matchedTutorSubjects.map((subject) => ({
+    value: subject.id,
+    label: subject.subject_name,
+  }));
+
+  const studentClass = classes.find((item) => String(item.id) === String(user?.class_id));
+  const studentClassLabel = studentClass?.class_name || user?.class_name || '';
+  const tutorClassValues = String(tutor.classes || tutor.class_name || '')
+    .split(/[,/|&]/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const tutorClassLabel = tutorClassValues.join(', ');
+  const hasClassMismatch =
+    Boolean(studentClassLabel) &&
+    tutorClassValues.length > 0 &&
+    !tutorClassValues.some((value) => value.toLowerCase() === String(studentClassLabel).toLowerCase());
 
   return (
     <div>
@@ -246,6 +385,12 @@ const TutorProfile = () => {
           <Card className="sticky top-4">
             <h2 className="text-xl font-semibold mb-4">Book a Session</h2>
 
+            {hasClassMismatch && (
+              <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                This tutor mainly teaches {tutorClassLabel} class students. You are in {studentClassLabel}. You can still continue with booking.
+              </div>
+            )}
+
             <form onSubmit={handleBooking}>
               <Input
                 label="Preferred Date"
@@ -255,6 +400,17 @@ const TutorProfile = () => {
                 onChange={handleDateChange}
                 required
                 min={new Date().toISOString().split('T')[0]}
+              />
+
+              <Select
+                label="Subject"
+                name="subject_id"
+                value={bookingData.subject_id}
+                onChange={handleInputChange}
+                options={bookingSubjectOptions}
+                required
+                disabled={bookingSubjectOptions.length <= 1}
+                placeholder="Select subject"
               />
 
               {bookingData.requested_date && (
@@ -322,13 +478,40 @@ const TutorProfile = () => {
 
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-gray-700">
-                <strong>Note:</strong> Your request will be sent to the tutor for approval.
-                You can make payment once the tutor accepts your request.
+                <strong>Note:</strong> You can explore this tutor and their slots first, then send a request once you have chosen a subject.
               </p>
             </div>
           </Card>
         </div>
       </div>
+
+      {showClassMismatchConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900">Class mismatch</h3>
+            <p className="mt-3 text-sm text-gray-600">
+              This tutor mainly teaches {tutorClassLabel} class students. You are in {studentClassLabel}. Do you want to continue with this booking?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                variant="secondary"
+                onClick={() => setShowClassMismatchConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                loading={submitting}
+                onClick={async () => {
+                  setShowClassMismatchConfirm(false);
+                  await submitBooking(Number(bookingData.subject_id));
+                }}
+              >
+                Continue Booking
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
