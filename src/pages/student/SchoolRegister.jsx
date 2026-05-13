@@ -4,8 +4,8 @@ const SchoolRegister = () => {
   return (
     <StudentRegisterForm
       category="school"
-      title="School Student Registration"
-      subtitle="Register for state syllabus or CBSE tuition for Classes 6 through 10."
+      title="School Tuition Registration"
+      subtitle="Create your student profile for State syllabus or CBSE tuition from Class 6 to Class 10."
       allowedCourseSlugs={["school-tuition", "cbse-school-tuition"]}
       classSelectionMode="required"
     />

@@ -50,9 +50,13 @@ const TutorProfile = () => {
           availabilityService.getTutorSlots(tutorId),
         ]);
 
+        const availabilityData = availabilityRes.data?.slots
+          ? availabilityRes.data
+          : availabilityRes.data?.data || availabilityRes.data || {};
+
         setTutor(tutorRes.data.tutor);
-        setAvailability(availabilityRes.data.slots);
-        setAvailabilityRange(availabilityRes.data.availability_range);
+        setAvailability(availabilityData.slots || []);
+        setAvailabilityRange(availabilityData.range || null);
       } catch (error) {
         console.error('Error fetching tutor data:', error);
         toast.error('Failed to load tutor details');
@@ -63,9 +67,29 @@ const TutorProfile = () => {
 
     fetchTutorData();
   }, [tutorId]);
-
   useEffect(() => {
-    if (!tutor || subjects.length === 0) {
+    if (!tutor) {
+      return;
+    }
+
+    if (tutor.subject_id) {
+      setBookingData((prev) => {
+        const tutorSubjectId = String(tutor.subject_id);
+
+        if (String(prev.subject_id) === tutorSubjectId) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          subject_id: tutorSubjectId,
+        };
+      });
+
+      return;
+    }
+
+    if (subjects.length === 0) {
       return;
     }
 
@@ -95,21 +119,6 @@ const TutorProfile = () => {
           normalizedName.includes(tutorSubject)
       );
     });
-
-    if (matchingSubjects.length === 0 && tutor.subject_id) {
-      const fallbackMatch = subjects.find(
-        (subject) => String(subject.id) === String(tutor.subject_id)
-      );
-
-      if (fallbackMatch) {
-        setBookingData((prev) => ({
-          ...prev,
-          subject_id: String(fallbackMatch.id),
-        }));
-      }
-
-      return;
-    }
 
     if (matchingSubjects.length === 0) {
       return;
@@ -176,6 +185,10 @@ const TutorProfile = () => {
         notes: bookingData.notes,
       };
 
+      console.log("subject_id",parsedSubjectId);
+console.log("course_id",user.course_id);
+console.log("tutor_subject_id",tutor.subject_id);
+
       await sessionService.createSessionRequest(requestData);
       toast.success('Session request sent successfully!');
       navigate('/student/sessions');
@@ -225,9 +238,31 @@ const TutorProfile = () => {
     );
   }
 
-  const formatDate = (dateStr) => {
+  const formatDateForInput = (dateStr) => {
+    if (!dateStr) {
+      return '';
+    }
+
     const date = new Date(dateStr);
-    return date.toLocaleDateString('hi-IN');
+
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60000);
+
+    return localDate.toISOString().split('T')[0];
+  };
+
+  const formatDate = (dateStr) => {
+    const inputDate = formatDateForInput(dateStr);
+
+    if (!inputDate) {
+      return '';
+    }
+
+    return new Date(`${inputDate}T00:00:00`).toLocaleDateString('hi-IN');
   };
 
   const getDaysLabel = (availabilitySlots) => {
@@ -271,6 +306,10 @@ const TutorProfile = () => {
   const matchedTutorSubjects = subjects.filter((subject) => {
     const normalizedName = normalizeSubjectName(subject.subject_name);
 
+    if (tutor.subject_id) {
+      return String(subject.id) === String(tutor.subject_id);
+    }
+
     if (tutorSubjectValues.length > 0) {
       return tutorSubjectValues.some(
         (tutorSubject) =>
@@ -280,17 +319,21 @@ const TutorProfile = () => {
       );
     }
 
-    if (tutor.subject_id) {
-      return String(subject.id) === String(tutor.subject_id);
-    }
-
     return false;
   });
 
-  const bookingSubjectOptions = matchedTutorSubjects.map((subject) => ({
-    value: subject.id,
-    label: subject.subject_name,
-  }));
+  const bookingSubjectOptions =
+    tutor.subject_id && matchedTutorSubjects.length === 0
+      ? [
+          {
+            value: tutor.subject_id,
+            label: tutor.subject_name || tutor.subjects || `Subject ID: ${tutor.subject_id}`,
+          },
+        ]
+      : matchedTutorSubjects.map((subject) => ({
+          value: subject.id,
+          label: subject.subject_name,
+        }));
 
   const studentClass = classes.find((item) => String(item.id) === String(user?.class_id));
   const studentClassLabel = studentClass?.class_name || user?.class_name || '';
@@ -303,6 +346,11 @@ const TutorProfile = () => {
     Boolean(studentClassLabel) &&
     tutorClassValues.length > 0 &&
     !tutorClassValues.some((value) => value.toLowerCase() === String(studentClassLabel).toLowerCase());
+  const today = formatDateForInput(new Date());
+  const availabilityStartDate = formatDateForInput(availabilityRange?.start_date);
+  const availabilityEndDate = formatDateForInput(availabilityRange?.end_date);
+  const minBookingDate =
+    availabilityStartDate && availabilityStartDate > today ? availabilityStartDate : today;
 
   return (
     <div>
@@ -399,7 +447,8 @@ const TutorProfile = () => {
                 value={bookingData.requested_date}
                 onChange={handleDateChange}
                 required
-                min={new Date().toISOString().split('T')[0]}
+                min={minBookingDate}
+                max={availabilityEndDate || undefined}
               />
 
               <Select

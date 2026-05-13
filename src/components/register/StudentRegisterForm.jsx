@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
+import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
 import {
   fetchClasses,
   fetchCourses,
@@ -53,6 +54,11 @@ const StudentRegisterForm = ({
   const selectedCourse = filteredCourses.find(
     (course) => String(course.id) === String(selectedCourseId)
   );
+  const isSchoolRegistration = classSelectionMode === "required";
+  const pathLabel = isSchoolRegistration ? "School Tuition" : "Entrance Exam Prep";
+  const guideItems = isSchoolRegistration
+    ? ["Choose your curriculum", "Select your class", "Pick the subjects you need"]
+    : ["Choose your exam track", "Pick the subjects you need", "Complete your student profile"];
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -150,16 +156,47 @@ const StudentRegisterForm = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-slate-900">{title}</h1>
-          <p className="mt-3 text-base text-slate-600">{subtitle}</p>
-        </div>
+    <div className="min-h-screen bg-[#f6f8fb] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <Link
+          to="/register"
+          className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-teal-700"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Student registration paths
+        </Link>
 
-        <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          <Card className="rounded-3xl border border-white/80 bg-white/95 p-8 shadow-xl">
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="mb-6 rounded-[2rem] border border-white bg-white/80 px-5 py-6 shadow-sm sm:px-8">
+  <div className="mx-auto max-w-3xl text-center">
+    
+    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-700">
+      {pathLabel}
+    </p>
+
+    <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+      {title}
+    </h1>
+
+    <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
+      {subtitle}
+    </p>
+
+  </div>
+</div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <Card className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <p className="text-sm font-semibold text-slate-500">Step 1 of 1</p>
+                <h2 className="mt-1 text-xl font-bold text-slate-950">Student details</h2>
+              </div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                <Sparkles className="h-5 w-5" aria-hidden="true" />
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-2">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input
                   label="First Name"
@@ -186,7 +223,7 @@ const StudentRegisterForm = ({
                 required
               />
               <Input
-                label="Mobile"
+                label="Mobile Number"
                 type="tel"
                 name="phone"
                 value={formData.phone}
@@ -211,16 +248,18 @@ const StudentRegisterForm = ({
               />
 
               <div className="border-t border-slate-100 pt-6">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Select Course
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  {isSchoolRegistration ? "Curriculum" : "Exam Track"}
                 </label>
                 <select
                   value={selectedCourseId}
                   onChange={handleCourseChange}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-teal-500"
                   required
                 >
-                  <option value="">Choose a course</option>
+                  <option value="">
+                    {isSchoolRegistration ? "Choose curriculum" : "Choose exam track"}
+                  </option>
                   {filteredCourses.map((course) => (
                     <option key={course.id} value={course.id}>
                       {course.course_name}
@@ -231,8 +270,8 @@ const StudentRegisterForm = ({
 
               {classSelectionMode !== "hidden" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Select Class
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Class
                     {classSelectionMode === "required" && (
                       <span className="ml-1 text-red-500">*</span>
                     )}
@@ -240,7 +279,7 @@ const StudentRegisterForm = ({
                   <select
                     value={selectedClassId}
                     onChange={(event) => setSelectedClassId(event.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-100"
                     disabled={!selectedCourseId}
                     required={classSelectionMode === "required"}
                   >
@@ -259,8 +298,8 @@ const StudentRegisterForm = ({
               )}
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Select Subjects
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Subjects
                 </label>
                 <div
                   className={`grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 ${
@@ -276,13 +315,13 @@ const StudentRegisterForm = ({
                     subjects.map((subject) => (
                       <label
                         key={subject.id}
-                        className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 text-sm text-slate-700"
+                        className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:border-teal-200 hover:bg-teal-50/40"
                       >
                         <input
                           type="checkbox"
                           checked={selectedSubjects.includes(subject.id)}
                           onChange={() => toggleSubject(subject.id)}
-                          className="h-4 w-4 rounded border-slate-300 text-blue-600"
+                          className="h-4 w-4 rounded border-slate-300 text-teal-700"
                         />
                         <span>{subject.subject_name}</span>
                       </label>
@@ -290,47 +329,83 @@ const StudentRegisterForm = ({
                 </div>
               </div>
 
-              <Button type="submit" loading={loading} fullWidth className="mt-4 py-3">
-                Register Now
+              <Button type="submit" loading={loading} fullWidth className="mt-4 bg-teal-700 py-3 hover:bg-teal-800 active:bg-teal-900">
+                Create Student Account
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-600">
               Already have an account?{" "}
-              <Link to="/login" className="font-medium text-blue-600 hover:underline">
+              <Link to="/login" className="font-semibold text-teal-700 hover:text-teal-800 hover:underline">
                 Sign in
               </Link>
             </p>
           </Card>
 
-          <Card className="rounded-3xl border border-white/80 bg-slate-900 p-8 text-white shadow-xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-200">
-              Registration Guide
-            </p>
-            <h2 className="mt-4 text-3xl font-bold">What we collect</h2>
-            <div className="mt-6 space-y-4 text-sm leading-6 text-slate-200">
-              <p>Your course is sent as a backend-ready slug, not a numeric course id.</p>
-              <p>Subjects are submitted as an array of subject ids so the tutor match stays intact.</p>
-              <p>
-                {classSelectionMode === "required"
-                  ? "School registrations require a class between 6th and 10th."
-                  : "Engineering registrations keep class selection optional and out of the way."}
-              </p>
-            </div>
+          <Card className="relative overflow-hidden rounded-[2rem] border border-teal-100 bg-gradient-to-br from-[#0f172a] via-[#132238] to-[#0d9488] p-6 text-white shadow-2xl sm:p-8">
+  
+  {/* Glow Effects */}
+  <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-teal-400/20 blur-3xl" />
+  <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-cyan-300/10 blur-2xl" />
 
-            <div className="mt-8 rounded-2xl bg-white/10 p-5">
-              <p className="text-sm font-semibold text-white">Need another student route?</p>
-              <p className="mt-2 text-sm text-slate-200">
-                You can return to the category chooser at any time and switch between school and engineering registration.
-              </p>
-              <Link
-                to="/register"
-                className="mt-4 inline-flex text-sm font-semibold text-blue-200 hover:text-white"
-              >
-                Back to student categories
-              </Link>
-            </div>
-          </Card>
+  <div className="relative z-10">
+    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-200">
+      Quick Setup
+    </p>
+
+    <h2 className="mt-4 text-3xl font-bold leading-tight text-white">
+      Start with the right tutor match
+    </h2>
+
+    <p className="mt-4 text-sm leading-7 text-slate-200">
+      Fill in your contact details, choose your learning path,
+      and select the subjects where you want support.
+    </p>
+
+    <div className="mt-7 space-y-3">
+      {guideItems.map((item) => (
+        <div
+          key={item}
+          className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-400/20">
+            <CheckCircle2
+              className="h-4 w-4 shrink-0 text-teal-200"
+              aria-hidden="true"
+            />
+          </div>
+
+          <span className="text-sm font-medium text-slate-100">
+            {item}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
+      <p className="text-sm font-semibold text-white">
+        Selected the wrong path?
+      </p>
+
+      <p className="mt-2 text-sm leading-6 text-slate-200">
+        Go back to choose between school tuition and
+        entrance exam prep registration.
+      </p>
+
+      <Link
+        to="/register"
+        className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-teal-200 transition hover:text-white"
+      >
+        Change path
+
+        <ArrowLeft
+          className="h-4 w-4 rotate-180"
+          aria-hidden="true"
+        />
+      </Link>
+    </div>
+  </div>
+</Card>
         </div>
       </div>
     </div>

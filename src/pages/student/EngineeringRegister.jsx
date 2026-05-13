@@ -4,8 +4,8 @@ const EngineeringRegister = () => {
   return (
     <StudentRegisterForm
       category="engineering"
-      title="Engineering Student Registration"
-      subtitle="Register for IIT JEE, NEET, or IIT Foundation tutoring with subject-focused onboarding."
+      title="Entrance Exam Prep Registration"
+      subtitle="Set up your student profile for IIT JEE, NEET, or foundation coaching with subject-focused tutor matching."
       allowedCourseSlugs={["iit-jee", "neet", "foundation-iit-jee"]}
       classSelectionMode="hidden"
     />

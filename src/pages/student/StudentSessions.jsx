@@ -5,8 +5,10 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 
 const StudentSessions = () => {
+  const { user, logout } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,12 @@ const StudentSessions = () => {
   };
 
   const handlePayment = async (session) => {
+    if (user?.role !== 'student') {
+      toast.error('Please log in with a student account to make payments');
+      logout();
+      return;
+    }
+
     setProcessingPayment(session.id);
 
     try {
@@ -54,6 +62,7 @@ const StudentSessions = () => {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
+              payment_method: 'upi',
             });
 
             if (!verifyResponse.success) {
@@ -73,7 +82,17 @@ const StudentSessions = () => {
       );
     } catch (error) {
       console.error('Payment error:', error);
-      toast.error(error.message || 'Payment failed');
+      const message =
+        error?.response?.data?.message ||
+        error.message ||
+        'Payment failed';
+
+      if (error?.response?.status === 403) {
+        toast.error(`${message}. Please log in again as a student.`);
+        logout();
+      } else {
+        toast.error(message);
+      }
     } finally {
       setProcessingPayment(null);
     }

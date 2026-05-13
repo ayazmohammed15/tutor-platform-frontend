@@ -37,12 +37,16 @@ export const paymentService = {
   createOrder: async (sessionId, paymentMethod = 'upi') => {
     const response = await api.post(`/payments/create-order/${sessionId}`, {
       payment_method: paymentMethod,
+    }, {
+      suppressGlobalError: true,
     });
     return response.data;
   },
 
   verifyPayment: async (paymentData) => {
-    const response = await api.post('/payments/verify', paymentData);
+    const response = await api.post('/payments/verify', paymentData, {
+      suppressGlobalError: true,
+    });
     return response.data;
   },
 

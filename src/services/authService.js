@@ -32,6 +32,28 @@ const extractAuthToken = (payload) => {
   return null;
 };
 
+const decodeJwtPayload = (token) => {
+  try {
+    const payload = token.split('.')[1];
+
+    if (!payload) {
+      return null;
+    }
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(normalizedPayload)
+        .split('')
+        .map((char) => `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`)
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+};
+
 export const authService = {
   register: async (userData) => {
     const response = await api.post('/auth/register', userData);
@@ -49,6 +71,9 @@ export const authService = {
   },
 
   login: async (credentials) => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
     const response = await api.post('/auth/login', credentials);
     if (response.data.success) {
       const user = extractAuthUser(response.data);
@@ -81,8 +106,29 @@ export const authService = {
   },
 
   getCurrentUser: () => {
+    const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+
+    if (!token || !userStr) {
+      return null;
+    }
+
+    try {
+      const user = JSON.parse(userStr);
+      const tokenPayload = decodeJwtPayload(token);
+      const tokenRole = tokenPayload?.role || tokenPayload?.data?.role;
+
+      if (tokenRole && user?.role && tokenRole !== user.role) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return null;
+      }
+
+      return user;
+    } catch {
+      localStorage.removeItem('user');
+      return null;
+    }
   },
 
   getToken: () => {
