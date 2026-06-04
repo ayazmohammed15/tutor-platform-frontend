@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { CheckCircle2, RefreshCw } from 'lucide-react';
 import useGoogleStatus from '../hooks/useGoogleStatus';
+import { API_BASE_URL } from '../services/api';
 
 const GoogleIcon = () => (
   <svg className="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true">
@@ -38,7 +39,7 @@ const GoogleCalendarSkeleton = () => (
 );
 
 const getGoogleAuthUrl = (token) => {
-  return `http://localhost:5000/api/auth/google?token=${token}`;
+  return `${API_BASE_URL}/auth/google?token=${token}`;
 };
 
 const GoogleCalendarConnect = () => {

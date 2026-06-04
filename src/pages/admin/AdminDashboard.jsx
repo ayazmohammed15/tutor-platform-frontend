@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { tutorService } from '../../services/tutorService';
+import { UPLOADS_BASE_URL } from '../../services/api';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
@@ -169,7 +170,7 @@ useEffect(() => {
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-4">
                   <img
-                    src={`http://localhost:5000/uploads/${tutor.profile_image}`}
+                    src={`${UPLOADS_BASE_URL}${tutor.profile_image}`}
                     alt="Profile"
                     className="w-14 h-14 rounded-full object-cover border"
                   />
@@ -207,7 +208,7 @@ useEffect(() => {
                 {tutor.resume && (
                   <div className="mt-4">
                     <a
-                      href={`http://localhost:5000/uploads/${tutor.resume}`}
+                      href={`${UPLOADS_BASE_URL}${tutor.resume}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 text-sm font-medium hover:underline"

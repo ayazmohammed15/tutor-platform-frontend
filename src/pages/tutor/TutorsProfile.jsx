@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { tutorService } from '../../services/tutorService';
+import { UPLOADS_BASE_URL } from '../../services/api';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { Pencil, CheckCircle, XCircle, Clock, BookOpen, Briefcase, GraduationCap, Video } from 'lucide-react';
-
-// IMPORTANT: Adjust this URL to match where your Node backend serves static images
-const IMAGE_BASE_URL = 'http://localhost:5000/uploads/';
 
 const TutorProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -135,7 +133,7 @@ const TutorProfile = () => {
           <div className="w-20 h-20 rounded-full bg-[#0fb673] flex items-center justify-center flex-shrink-0 text-2xl font-bold text-white uppercase overflow-hidden">
             {profile?.profile_image ? (
               <img 
-                src={`${IMAGE_BASE_URL}${profile.profile_image}`} 
+                src={`${UPLOADS_BASE_URL}${profile.profile_image}`} 
                 alt={`${profile.first_name} ${profile.last_name}`}
                 className="w-full h-full object-cover"
               />

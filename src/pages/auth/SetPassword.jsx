@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../services/api";
 
 const SetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -33,7 +34,7 @@ const SetPassword = () => {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:5000/api/auth/set-password", {
+      await axios.post(`${API_BASE_URL}/auth/set-password`, {
         token,
         password
       });

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+export const UPLOADS_BASE_URL = import.meta.env.VITE_UPLOADS_BASE_URL || API_BASE_URL.replace(/\/api\/?$/, '/uploads');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
