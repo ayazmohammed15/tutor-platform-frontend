@@ -31,6 +31,7 @@ import TutorPayments from './pages/tutor/TutorPayments';
 import TutorAvailability from './pages/tutor/TutorAvailability';
 import TutorRegistrationSuccess from "./components/common/TutorRegistrationSuccess";
 import StudentProfile from './pages/student/StudentProfile';
+import StudentPayments from './pages/student/StudentPayments';
 import AboutUs from './pages/AboutUs';
 import HowItWorks from './pages/HowItWorks';
 import GoogleConnected from './pages/tutor/GoogleConnected';
@@ -93,12 +94,12 @@ function App() {
               path="profile"
               element={<StudentProfile />} />
             <Route
-              path="assignments"
-              element={<RolePlaceholder title="Assignments" description="Student assignments will appear here." />}
+              path="payments"
+              element={<StudentPayments />}
             />
             <Route
-              path="payments"
-              element={<RolePlaceholder title="Payments" description="Student payment history will appear here." />}
+              path="assignments"
+              element={<RolePlaceholder title="Assignments" description="Student assignments will appear here." />}
             />
           </Route>
 

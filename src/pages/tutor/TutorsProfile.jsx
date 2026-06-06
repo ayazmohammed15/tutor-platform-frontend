@@ -133,7 +133,7 @@ const TutorProfile = () => {
           <div className="w-20 h-20 rounded-full bg-[#0fb673] flex items-center justify-center flex-shrink-0 text-2xl font-bold text-white uppercase overflow-hidden">
             {profile?.profile_image ? (
               <img 
-                src={`${UPLOADS_BASE_URL}${profile.profile_image}`} 
+                src={`${UPLOADS_BASE_URL}/${profile.profile_image}`} 
                 alt={`${profile.first_name} ${profile.last_name}`}
                 className="w-full h-full object-cover"
               />

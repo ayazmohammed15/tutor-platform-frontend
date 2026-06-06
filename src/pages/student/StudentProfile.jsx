@@ -4,11 +4,13 @@ import { Pencil } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { fetchClasses, fetchCourses } from '../../features/register/registerSlice';
+import { UPLOADS_BASE_URL } from '../../services/api';
 
 const StudentProfile = () => {
   const dispatch = useDispatch();
   const { user, loading } = useAuth();
   const { courses, classes } = useSelector((state) => state.register);
+  const avatarUrl = user?.profile_image ? `${UPLOADS_BASE_URL}/${user.profile_image}` : null;
 
   useEffect(() => {
     if (!courses.length) {
@@ -71,11 +73,16 @@ const StudentProfile = () => {
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-5">
           {/* Avatar */}
-          <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
-             {/* You can replace this with an actual <img src="..." /> later */}
-            <span className="text-2xl font-bold text-white">
-              {initials}
-            </span>
+          <div className="w-20 h-20 rounded-full bg-[#0fb673] flex items-center justify-center flex-shrink-0 text-2xl font-bold text-white uppercase overflow-hidden">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={`${studentData.firstName} ${studentData.lastName}`.trim() || 'Student profile'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{initials}</span>
+            )}
           </div>
           
           {/* User Info */}

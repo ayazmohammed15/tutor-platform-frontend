@@ -208,7 +208,7 @@ useEffect(() => {
                 {tutor.resume && (
                   <div className="mt-4">
                     <a
-                      href={`${UPLOADS_BASE_URL}${tutor.resume}`}
+                      href={`${UPLOADS_BASE_URL}/${tutor.resume}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 text-sm font-medium hover:underline"

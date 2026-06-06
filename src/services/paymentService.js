@@ -43,6 +43,13 @@ export const paymentService = {
     return response.data;
   },
 
+  getStudentPayments: async () => {
+    const response = await api.get('/payments/student', {
+      suppressGlobalError: true,
+    });
+    return response.data;
+  },
+
   verifyPayment: async (paymentData) => {
     const response = await api.post('/payments/verify', paymentData, {
       suppressGlobalError: true,

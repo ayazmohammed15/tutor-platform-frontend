@@ -384,7 +384,7 @@ const TutorAvatar = ({ tutor, size = "md" }) => {
   if (tutor?.profile_image) {
     return (
       <img
-        src={`${UPLOADS_BASE_URL}${tutor.profile_image}`}
+        src={`${UPLOADS_BASE_URL}/${tutor.profile_image}`}
         className={`${sizeClass} flex-shrink-0 rounded-2xl border border-gray-200 object-cover`}
         alt=""
       />
@@ -437,7 +437,7 @@ const DocumentLink = ({ label, file, icon: Icon }) => {
 
   return (
     <a
-      href={`${UPLOADS_BASE_URL}${file}`}
+      href={`${UPLOADS_BASE_URL}/${file}`}
       target="_blank"
       rel="noreferrer"
       className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
