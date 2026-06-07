@@ -195,7 +195,7 @@ const AdminSubjects = () => {
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+              <thead className="bg-gray-50 text-xs  tracking-wide text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-semibold">S.No</th>
                   <th className="px-4 py-3 font-semibold">Course Name</th>
@@ -241,9 +241,9 @@ const AdminSubjects = () => {
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+              <thead className="bg-gray-50 text-xs tracking-wide text-gray-500">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">ID</th>
+                  <th className="px-4 py-3 font-semibold">S.No</th>
                   <th className="px-4 py-3 font-semibold">Subject Name</th>
                   <th className="px-4 py-3 font-semibold">Slug</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
