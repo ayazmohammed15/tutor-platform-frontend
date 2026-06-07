@@ -20,9 +20,9 @@ const CLASS_NAME_ALLOWLIST = new Set(["6th", "7th", "8th", "9th", "10th"]);
 
 const StudentRegisterForm = ({
   category,
+  course_type,
   title,
   subtitle,
-  allowedCourseSlugs,
   classSelectionMode = "required",
 }) => {
   const dispatch = useDispatch();
@@ -42,9 +42,7 @@ const StudentRegisterForm = ({
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedSubjects, setSelectedSubjects] = useState([]);
 
-  const filteredCourses = courses.filter((course) =>
-    allowedCourseSlugs.includes(course.slug)
-  );
+  const filteredCourses = courses;
 
   const filteredClasses =
     classSelectionMode === "required"
@@ -61,13 +59,13 @@ const StudentRegisterForm = ({
     : ["Choose your exam track", "Pick the subjects you need", "Complete your student profile"];
 
   useEffect(() => {
-    dispatch(fetchCourses());
+    dispatch(fetchCourses(course_type));
     dispatch(fetchClasses());
 
     return () => {
       dispatch(resetRegisterState());
     };
-  }, [dispatch]);
+  }, [dispatch, course_type]);
 
   useEffect(() => {
     if (!selectedCourseId) {
@@ -167,22 +165,22 @@ const StudentRegisterForm = ({
         </Link>
 
         <div className="mb-6 rounded-[2rem] border border-white bg-white/80 px-5 py-6 shadow-sm sm:px-8">
-  <div className="mx-auto max-w-3xl text-center">
-    
-    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-700">
-      {pathLabel}
-    </p>
+          <div className="mx-auto max-w-3xl text-center">
 
-    <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-      {title}
-    </h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-700">
+              {pathLabel}
+            </p>
 
-    <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
-      {subtitle}
-    </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              {title}
+            </h1>
 
-  </div>
-</div>
+            <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
+              {subtitle}
+            </p>
+
+          </div>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <Card className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
@@ -302,9 +300,8 @@ const StudentRegisterForm = ({
                   Subjects
                 </label>
                 <div
-                  className={`grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 ${
-                    !selectedCourseId ? "opacity-60" : ""
-                  }`}
+                  className={`grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 ${!selectedCourseId ? "opacity-60" : ""
+                    }`}
                 >
                   {!selectedCourseId && (
                     <p className="text-sm text-slate-500 sm:col-span-2">
@@ -343,69 +340,69 @@ const StudentRegisterForm = ({
           </Card>
 
           <Card className="relative overflow-hidden rounded-[2rem] border border-teal-100 bg-gradient-to-br from-[#0f172a] via-[#132238] to-[#0d9488] p-6 text-white shadow-2xl sm:p-8">
-  
-  {/* Glow Effects */}
-  <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-teal-400/20 blur-3xl" />
-  <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-cyan-300/10 blur-2xl" />
 
-  <div className="relative z-10">
-    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-200">
-      Quick Setup
-    </p>
+            {/* Glow Effects */}
+            <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-teal-400/20 blur-3xl" />
+            <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-cyan-300/10 blur-2xl" />
 
-    <h2 className="mt-4 text-3xl font-bold leading-tight text-white">
-      Start with the right tutor match
-    </h2>
+            <div className="relative z-10">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-200">
+                Quick Setup
+              </p>
 
-    <p className="mt-4 text-sm leading-7 text-slate-200">
-      Fill in your contact details, choose your learning path,
-      and select the subjects where you want support.
-    </p>
+              <h2 className="mt-4 text-3xl font-bold leading-tight text-white">
+                Start with the right tutor match
+              </h2>
 
-    <div className="mt-7 space-y-3">
-      {guideItems.map((item) => (
-        <div
-          key={item}
-          className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-400/20">
-            <CheckCircle2
-              className="h-4 w-4 shrink-0 text-teal-200"
-              aria-hidden="true"
-            />
-          </div>
+              <p className="mt-4 text-sm leading-7 text-slate-200">
+                Fill in your contact details, choose your learning path,
+                and select the subjects where you want support.
+              </p>
 
-          <span className="text-sm font-medium text-slate-100">
-            {item}
-          </span>
-        </div>
-      ))}
-    </div>
+              <div className="mt-7 space-y-3">
+                {guideItems.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-400/20">
+                      <CheckCircle2
+                        className="h-4 w-4 shrink-0 text-teal-200"
+                        aria-hidden="true"
+                      />
+                    </div>
 
-    <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
-      <p className="text-sm font-semibold text-white">
-        Selected the wrong path?
-      </p>
+                    <span className="text-sm font-medium text-slate-100">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
-      <p className="mt-2 text-sm leading-6 text-slate-200">
-        Go back to choose between school tuition and
-        entrance exam prep registration.
-      </p>
+              <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
+                <p className="text-sm font-semibold text-white">
+                  Selected the wrong path?
+                </p>
 
-      <Link
-        to="/register"
-        className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-teal-200 transition hover:text-white"
-      >
-        Change path
+                <p className="mt-2 text-sm leading-6 text-slate-200">
+                  Go back to choose between school tuition and
+                  entrance exam prep registration.
+                </p>
 
-        <ArrowLeft
-          className="h-4 w-4 rotate-180"
-          aria-hidden="true"
-        />
-      </Link>
-    </div>
-  </div>
-</Card>
+                <Link
+                  to="/register"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-teal-200 transition hover:text-white"
+                >
+                  Change path
+
+                  <ArrowLeft
+                    className="h-4 w-4 rotate-180"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

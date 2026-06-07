@@ -4,12 +4,23 @@ import api from "../../services/api";
 // Fetch Courses
 export const fetchCourses = createAsyncThunk(
   "/fetchCourses",
-  async (_, { rejectWithValue }) => {
+  async (type = null, { rejectWithValue }) => {
     try {
-      const res = await api.get("/courses");
+
+      const url = type
+        ? `/courses?type=${type}`
+        : "/courses";
+
+      const res = await api.get(url);
+
       return res.data;
+
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to fetch courses");
+
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch courses"
+      );
+
     }
   }
 );
