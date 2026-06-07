@@ -170,7 +170,7 @@ useEffect(() => {
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-4">
                   <img
-                    src={`${UPLOADS_BASE_URL}${tutor.profile_image}`}
+                    src={`${UPLOADS_BASE_URL}/${tutor.profile_image}`}
                     alt="Profile"
                     className="w-14 h-14 rounded-full object-cover border"
                   />
