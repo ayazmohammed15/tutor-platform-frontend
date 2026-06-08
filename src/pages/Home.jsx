@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import RegistrationCategoryCards from '../components/register/RegistrationCategoryCards';
 
 
 const learningTabs = {
@@ -112,13 +111,22 @@ const Home = () => {
       <section className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-8">
           <div className="mb-10 text-center">
-            <h2 className="text-4xl font-bold text-gray-900">Choose Your Learning Path</h2>
+            <h2 className="text-4xl font-bold text-gray-900">Create Your Student Account</h2>
             <p className="mt-4 text-gray-600">
-              Pick the student category that fits best and continue with a tailored registration flow.
+              Sign up to connect with tutors and start your learning journey.
             </p>
           </div>
 
-          <RegistrationCategoryCards compact />
+          <div className="flex justify-center">
+            <button
+              className="bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-blue-700"
+              onClick={() => {
+                navigate("/register")
+              }}
+            >
+              Get started
+            </button>
+          </div>
         </div>
       </section>
 

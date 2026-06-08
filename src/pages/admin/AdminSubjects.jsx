@@ -166,7 +166,7 @@ const AdminSubjects = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Subjects & Curriculum</h1>
-          <p className="text-sm text-gray-500 mt-1">Configure boards (CBSE, State), classes (6-10), and available subjects.</p>
+          {/* <p className="text-sm text-gray-500 mt-1">Configure boards (CBSE, State), classes (6-10), and available subjects.</p> */}
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">

@@ -1,32 +1,32 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Star, Clock } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
+import { Star } from "lucide-react";
 import { tutorService } from "../../services/tutorService";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
-import Select from "../../components/common/Select";
+import TutorFilterBar from "../../components/tutor/TutorFilterBar";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { useAuth } from "../../context/AuthContext";
 import {
   fetchCourses,
   fetchClasses,
-  fetchSubjectsByCourse,
+  fetchSubjects,
 } from "../../features/register/registerSlice";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useAuth();
   const { courses, subjects, classes } = useSelector((state) => state.register);
 
-  const [chapters] = useState([]);
   const [filters, setFilters] = useState({
+    tutor_name: "",
     course_id: "",
+    course_ids: "",
     class_id: "",
+    class_ids: "",
     subject_id: "",
-    chapter_ids: [],
+    subject_ids: "",
   });
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -35,79 +35,16 @@ const StudentDashboard = () => {
   useEffect(() => {
     dispatch(fetchCourses());
     dispatch(fetchClasses());
+    dispatch(fetchSubjects());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    setFilters({
-      course_id: user.course_id || "",
-      class_id: user.class_id || "",
-      subject_id: "",
-      chapter_ids: [],
-    });
-  }, [user]);
-
-  useEffect(() => {
-    if (!user?.course_id) {
-      return;
-    }
-
-    dispatch(fetchSubjectsByCourse(user.course_id));
-  }, [dispatch, user?.course_id]);
-
-  useEffect(() => {
-    if (!user?.course_id) {
-      return;
-    }
-
-    const autoSearchTutors = async () => {
-      setLoading(true);
-      setSearched(true);
-
-      try {
-        const res = await tutorService.searchTutors();
-        const tutorsList = res?.data?.tutors || [];
-        setTutors(tutorsList);
-      } catch (error) {
-        console.error(error);
-        toast.error("Something went wrong while loading tutors");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    autoSearchTutors();
-  }, [user?.course_id]);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === "subject_id" && {
-        chapter_ids: [],
-      }),
-    }));
-  };
-
   const handleSearch = async () => {
-    if (!user?.course_id) {
-      toast.error("Your account is missing course details");
-      return;
-    }
-
     setLoading(true);
     setSearched(true);
 
     try {
-      const res = await tutorService.searchTutors({
-        subject_id: filters.subject_id || undefined,
-      });
-
+      // Pass filters to the backend API
+      const res = await tutorService.searchTutors(filters);
       const tutorsList = res?.data?.tutors || [];
       setTutors(tutorsList);
 
@@ -136,96 +73,16 @@ const StudentDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 mt-9">
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 -mt-12 relative z-20 mx-4 sm:mx-8">
-        <div className="flex items-center gap-2 mb-6 text-gray-800">
-          <Search className="w-5 h-5 text-indigo-600" />
-          <h2 className="text-lg font-bold">Search Parameters</h2>
-        </div>
-
-        <div className="mb-5 rounded-2xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
-          Your course stays aligned with your student profile, and subject can be used as an optional tutor filter.
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <Select
-            label="Course"
-            name="course_id"
-            value={filters.course_id}
-            onChange={handleChange}
-            options={courses.map((course) => ({
-              value: course.id,
-              label: course.course_name,
-            }))}
-            disabled
-            placeholder="Assigned course"
-          />
-
-          <Select
-            label="Class"
-            name="class_id"
-            value={filters.class_id}
-            onChange={handleChange}
-            options={classes.map((item) => ({
-              value: item.id,
-              label: item.class_name,
-            }))}
-            disabled
-            placeholder="Assigned class"
-          />
-
-          <Select
-            label="Subject"
-            name="subject_id"
-            value={filters.subject_id}
-            onChange={handleChange}
-            options={subjects.map((subject) => ({
-              value: subject.id,
-              label: subject.subject_name,
-            }))}
-            disabled={!user?.course_id}
-            placeholder="All subjects"
-          />
-
-          <Select
-            label="Chapters (Optional)"
-            name="chapter_ids"
-            value={filters.chapter_ids?.[0] || ""}
-            onChange={(event) => {
-              const selectedChapterId = event.target.value;
-              setFilters((prev) => ({
-                ...prev,
-                chapter_ids: selectedChapterId ? [selectedChapterId] : [],
-              }));
-            }}
-            options={chapters.map((chapter) => ({
-              value: chapter.id,
-              label: chapter.chapter_name,
-            }))}
-            disabled={!filters.subject_id}
-            placeholder="Select chapter..."
-          />
-        </div>
-
-        <div className="mt-8 flex flex-wrap gap-4 items-center justify-end border-t border-gray-100 pt-6">
-          <Button
-            variant="secondary"
-            type="button"
-            onClick={() => navigate("/student/sessions")}
-            className="text-gray-600 bg-gray-100 hover:bg-gray-200 border-none"
-          >
-            <Clock className="w-4 h-4 mr-2 inline" />
-            My Sessions
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSearch}
-            loading={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 shadow-md hover:shadow-lg transition-all"
-          >
-            Find Tutors
-          </Button>
-        </div>
-      </div>
+      {/* Filter Bar Component */}
+      <TutorFilterBar
+        courses={courses}
+        classes={classes}
+        subjects={subjects}
+        filters={filters}
+        onFilterChange={setFilters}
+        onSearch={handleSearch}
+        loading={loading}
+      />
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 text-indigo-600">

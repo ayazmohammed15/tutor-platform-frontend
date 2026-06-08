@@ -60,16 +60,6 @@ export const authService = {
     return response.data;
   },
 
-  registerSchoolStudent: async (userData) => {
-    const response = await api.post('/auth/register/school', userData);
-    return response.data;
-  },
-
-  registerEngineeringStudent: async (userData) => {
-    const response = await api.post('/auth/register/engineering', userData);
-    return response.data;
-  },
-
   login: async (credentials) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

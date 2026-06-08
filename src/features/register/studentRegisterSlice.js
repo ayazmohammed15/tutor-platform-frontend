@@ -3,16 +3,8 @@ import { authService } from "../../services/authService";
 
 export const registerStudent = createAsyncThunk(
   "studentRegister",
-  async ({ category, payload }, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      if (category === "school") {
-        return await authService.registerSchoolStudent(payload);
-      }
-
-      if (category === "engineering") {
-        return await authService.registerEngineeringStudent(payload);
-      }
-
       return await authService.register(payload);
     } catch (error) {
       const responseData = error.response?.data;
