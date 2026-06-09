@@ -19,29 +19,12 @@ export const tutorService = {
   searchTutors: async (filters = {}) => {
     const params = new URLSearchParams();
 
-    // Support single or multiple values (comma-separated or arrays)
-    const addParam = (key, value) => {
-      if (!value) return;
-      
-      // Convert array to comma-separated string
-      if (Array.isArray(value)) {
-        value = value.filter(Boolean).join(',');
-      }
-      
-      // Only add if not empty after filtering
-      if (String(value).trim()) {
-        params.append(key, value);
-      }
-    };
-
-    // Support both singular and plural param names for flexibility
-    if (filters.course_id) addParam('course_id', filters.course_id);
-    if (filters.course_ids) addParam('course_ids', filters.course_ids);
-    if (filters.class_id) addParam('class_id', filters.class_id);
-    if (filters.class_ids) addParam('class_ids', filters.class_ids);
-    if (filters.subject_id) addParam('subject_id', filters.subject_id);
-    if (filters.subject_ids) addParam('subject_ids', filters.subject_ids);
-    if (filters.chapter_id) addParam('chapter_id', filters.chapter_id);
+    if (filters.search?.trim())         params.append('search', filters.search.trim());
+    if (filters.course_id)              params.append('course_id', filters.course_id);
+    if (filters.class_id)               params.append('class_id', filters.class_id);
+    if (filters.subject_id)             params.append('subject_id', filters.subject_id);
+    if (filters.qualification?.trim())  params.append('qualification', filters.qualification.trim());
+    if (filters.min_experience)         params.append('min_experience', filters.min_experience);
 
     const query = params.toString();
     const response = await api.get(query ? `/tutors/search?${query}` : '/tutors/search');

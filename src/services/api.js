@@ -6,6 +6,7 @@ export const UPLOADS_BASE_URL = import.meta.env.VITE_UPLOADS_BASE_URL || API_BAS
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,9 +41,11 @@ api.interceptors.response.use(
       window.location.href = '/login';
     }
 
-    if (!isLoginRequest && !suppressGlobalError) {
-      const message = error.response?.data?.message || 'An error occurred';
-      toast.error(message);
+    if (!suppressGlobalError) {
+      const message = error.response?.data?.message || error.message || 'An error occurred';
+      if (!isLoginRequest) {
+        toast.error(message);
+      }
     }
 
     return Promise.reject(error);

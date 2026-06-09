@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
@@ -12,6 +12,7 @@ import {
   fetchCourses,
   fetchClasses,
   fetchSubjects,
+  fetchSubjectsByCourse,
 } from "../../features/register/registerSlice";
 
 const StudentDashboard = () => {
@@ -19,39 +20,29 @@ const StudentDashboard = () => {
   const dispatch = useDispatch();
   const { courses, subjects, classes } = useSelector((state) => state.register);
 
-  const [filters, setFilters] = useState({
-    tutor_name: "",
+  const EMPTY_FILTERS = {
+    search: "",
+    course_type: "",
     course_id: "",
-    course_ids: "",
     class_id: "",
-    class_ids: "",
     subject_id: "",
-    subject_ids: "",
-  });
+    qualification: "",
+    min_experience: "",
+  };
+
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchCourses());
-    dispatch(fetchClasses());
-    dispatch(fetchSubjects());
-  }, [dispatch]);
-
-  const handleSearch = async () => {
+  const loadTutors = useCallback(async (activeFilters, showToast = false) => {
     setLoading(true);
-    setSearched(true);
-
     try {
-      // Pass filters to the backend API
-      const res = await tutorService.searchTutors(filters);
-      const tutorsList = res?.data?.tutors || [];
-      setTutors(tutorsList);
-
-      if (tutorsList.length === 0) {
-        toast("No tutors found for the selected filters");
-      } else {
-        toast.success(`Found ${tutorsList.length} tutor(s)`);
+      const res = await tutorService.searchTutors(activeFilters);
+      const list = res?.data?.tutors || [];
+      setTutors(list);
+      if (showToast) {
+        if (list.length === 0) toast("No tutors found for the selected filters");
+        else toast.success(`Found ${list.length} tutor(s)`);
       }
     } catch (error) {
       console.error(error);
@@ -59,13 +50,54 @@ const StudentDashboard = () => {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Load master data and all tutors on mount
+  useEffect(() => {
+    dispatch(fetchCourses());
+    dispatch(fetchClasses());
+    dispatch(fetchSubjects());
+    loadTutors({});
+  }, [dispatch, loadTutors]);
+
+  // Cascade: course_type change → refetch filtered courses + reset subjects
+  // Cascade: course_id change → refetch subjects for that course
+  const handleFilterChange = (newFilters) => {
+    const courseTypeChanged = newFilters.course_type !== filters.course_type;
+    const courseChanged = newFilters.course_id !== filters.course_id;
+
+    if (courseTypeChanged) {
+      setFilters({ ...newFilters, course_id: "", subject_id: "" });
+      dispatch(fetchCourses(newFilters.course_type || null));
+      dispatch(fetchSubjects());
+      return;
+    }
+
+    if (courseChanged) {
+      setFilters({ ...newFilters, subject_id: "" });
+      if (newFilters.course_id) {
+        dispatch(fetchSubjectsByCourse(newFilters.course_id));
+      } else {
+        dispatch(fetchSubjects());
+      }
+      return;
+    }
+
+    setFilters(newFilters);
+  };
+
+  const handleSearch = () => loadTutors(filters, true);
+
+  const handleClear = () => {
+    setFilters(EMPTY_FILTERS);
+    dispatch(fetchCourses());
+    dispatch(fetchSubjects());
+    loadTutors({});
   };
 
   const handleTutorClick = (id) => {
     navigate(`/student/tutor/${id}`, {
-      state: {
-        subject_id: filters.subject_id || undefined,
-      },
+      state: { subject_id: filters.subject_id || undefined },
     });
   };
 
@@ -73,14 +105,14 @@ const StudentDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 mt-9">
-      {/* Filter Bar Component */}
       <TutorFilterBar
         courses={courses}
         classes={classes}
         subjects={subjects}
         filters={filters}
-        onFilterChange={setFilters}
+        onFilterChange={handleFilterChange}
         onSearch={handleSearch}
+        onClear={handleClear}
         loading={loading}
       />
 
@@ -91,7 +123,7 @@ const StudentDashboard = () => {
         </div>
       )}
 
-      {!loading && searched && (
+      {!loading && (
         <div className="animate-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
@@ -139,7 +171,9 @@ const StudentDashboard = () => {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Hourly Rate</p>
-                      <p className="font-bold text-indigo-600">Rs {tutor.hourly_rate}/hr</p>
+                      <p className="font-bold text-indigo-600">
+                        {tutor.hourly_rate ? `Rs ${tutor.hourly_rate}/hr` : "Contact for rate"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -148,8 +182,8 @@ const StudentDashboard = () => {
                   <Button
                     variant="outline"
                     fullWidth
-                    onClick={(event) => {
-                      event.stopPropagation();
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleTutorClick(tutor.user_id);
                     }}
                     className="border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-colors rounded-xl"
