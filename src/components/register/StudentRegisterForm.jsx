@@ -130,13 +130,15 @@ const StudentRegisterForm = () => {
                   label="First Name"
                   name="first_name"
                   value={formData.first_name}
-                  onChange={handleChange}                  
+                  onChange={handleChange}
+                  required                  
                 />
                 <Input
                   label="Last Name"
                   name="last_name"
                   value={formData.last_name}
-                  onChange={handleChange}                  
+                  onChange={handleChange}
+                  required                  
                 />
               </div>
 
@@ -145,28 +147,32 @@ const StudentRegisterForm = () => {
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}                
+                onChange={handleChange} 
+                required               
               />
               <Input
                 label="Mobile Number"
                 type="tel"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}                
+                onChange={handleChange}  
+                required              
               />
               <Input
                 label="Password"
                 type="password"
                 name="password"
                 value={formData.password}
-                onChange={handleChange}                
+                onChange={handleChange}  
+                required              
               />
               <Input
                 label="Confirm Password"
                 type="password"
                 name="confirmPassword"
                 value={formData.confirmPassword}
-                onChange={handleChange}                
+                onChange={handleChange} 
+                required               
               />
 
               <Button
