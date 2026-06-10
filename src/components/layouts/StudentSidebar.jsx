@@ -44,7 +44,7 @@ const StudentSidebar = ({ isOpen, setIsOpen }) => {
               <GraduationCap className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">TutorBook<span className="text-blue-400">.</span></h2>
+              <h2 className="text-xl font-bold tracking-tight text-white">ScienceEdu<span className="text-blue-400">.</span></h2>
               <p className="text-[10px] font-semibold text-blue-200 uppercase tracking-widest">Student Portal</p>
             </div>
           </div>

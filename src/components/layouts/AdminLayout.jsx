@@ -56,7 +56,7 @@ const AdminLayout = () => {
             </div>
             <div className="flex flex-col justify-center">
               <h2 className="text-xl font-bold tracking-tight text-white leading-none mt-1">
-                TutorBook<span className="text-blue-400">.</span>
+                ScienceEdu<span className="text-blue-400">.</span>
               </h2>
               <p className="text-[10px] font-semibold text-blue-200 uppercase tracking-widest mt-1">
                 Admin Portal

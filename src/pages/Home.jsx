@@ -49,7 +49,7 @@ const Home = () => {
     <div className="min-h-screen font-sans text-gray-900">
       {/* NAVBAR */}
       <nav className="flex items-center justify-between px-8 py-5 bg-white max-w-7xl mx-auto">
-        <div className="text-2xl font-bold tracking-tight">TutorBook</div>
+        <div className="text-2xl font-bold tracking-tight">ScienceEdu</div>
         <div className="hidden md:flex space-x-8 font-medium text-sm text-gray-700">
           <a href="/register" className="hover:text-blue-600">Find a Tutor</a>
           <Link to="/about-us" className="hover:text-blue-600">About Us</Link>

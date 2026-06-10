@@ -5,7 +5,7 @@ import Select from "../common/Select";
 const COURSE_TYPES = [
   { value: "", label: "All" },
   { value: "general", label: "General" },
-  { value: "entrance", label: "Entrance" },
+  { value: "entrance", label: "Entrance Prep" },
 ];
 
 const TutorFilterBar = ({ courses, classes, subjects, filters, onFilterChange, onSearch, onClear, loading }) => {
@@ -31,11 +31,10 @@ const TutorFilterBar = ({ courses, classes, subjects, filters, onFilterChange, o
               key={t.value}
               type="button"
               onClick={() => handleCourseTypeSelect(t.value)}
-              className={`px-5 py-2 rounded-lg text-sm font-medium border transition-all ${
-                filters.course_type === t.value
+              className={`px-5 py-2 rounded-lg text-sm font-medium border transition-all ${filters.course_type === t.value
                   ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                   : "bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600"
-              }`}
+                }`}
             >
               {t.label}
             </button>
@@ -72,20 +71,12 @@ const TutorFilterBar = ({ courses, classes, subjects, filters, onFilterChange, o
       </div>
 
       {/* Qualification + Experience */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+        {/* Experience */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">Qualification</label>
-          <input
-            type="text"
-            name="qualification"
-            value={filters.qualification || ""}
-            onChange={handleChange}
-            placeholder="e.g. B.Tech, M.Sc, PhD"
-            className="w-full rounded-lg border border-gray-300 py-2 px-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">Min. Experience (Years)</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Min. Experience (Years)
+          </label>
           <input
             type="number"
             name="min_experience"
@@ -97,12 +88,12 @@ const TutorFilterBar = ({ courses, classes, subjects, filters, onFilterChange, o
             className="w-full rounded-lg border border-gray-300 py-2 px-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-      </div>
 
-      {/* Search Bar + Buttons — one row */}
-      <div className="flex flex-col sm:flex-row gap-3 items-end">
-        <div className="flex-1">
-          <label className="mb-2 block text-sm font-medium text-gray-700">Search</label>
+        {/* Search */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Search
+          </label>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
@@ -115,27 +106,28 @@ const TutorFilterBar = ({ courses, classes, subjects, filters, onFilterChange, o
             />
           </div>
         </div>
+      </div>
 
-        <div className="flex gap-3 shrink-0">
-          <Button
-            type="button"
-            onClick={onSearch}
-            loading={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 shadow-md hover:shadow-lg transition-all whitespace-nowrap"
-          >
-            Find Tutors
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClear}
-            disabled={loading}
-            className="border-gray-300 text-gray-600 hover:border-red-400 hover:text-red-600 px-4 whitespace-nowrap flex items-center gap-1"
-          >
-            <X className="w-4 h-4" />
-            Clear Filters
-          </Button>
-        </div>
+      <div className="flex gap-3 justify-end">
+        <Button
+          type="button"
+          onClick={onSearch}
+          loading={loading}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6"
+        >
+          Find Tutors
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClear}
+          disabled={loading}
+          className="border-gray-300 text-gray-600 hover:border-red-400 hover:text-red-600 px-4 flex items-center gap-1"
+        >
+          <X className="w-4 h-4" />
+          Clear Filters
+        </Button>
       </div>
     </div>
   );

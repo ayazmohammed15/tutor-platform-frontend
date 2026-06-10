@@ -51,6 +51,16 @@ const StudentRegisterForm = () => {
       return;
     }
 
+    if (!formData.phone.trim()) {
+      toast.error("Mobile number is required");
+      return;
+    }
+
+    if (!/^[0-9]{10}$/.test(formData.phone.trim())) {
+      toast.error("Please enter a valid 10 digit mobile number");
+      return;
+    }
+
     if (!formData.password) {
       toast.error("Password is required");
       return;
@@ -65,12 +75,9 @@ const StudentRegisterForm = () => {
       first_name: formData.first_name.trim(),
       last_name: formData.last_name.trim(),
       email: formData.email.trim(),
+      phone: formData.phone.trim(),
       password: formData.password,
     };
-
-    if (formData.phone.trim()) {
-      payload.phone = formData.phone.trim();
-    }
 
     const resultAction = await dispatch(registerStudent(payload));
 
@@ -123,15 +130,13 @@ const StudentRegisterForm = () => {
                   label="First Name"
                   name="first_name"
                   value={formData.first_name}
-                  onChange={handleChange}
-                  required
+                  onChange={handleChange}                  
                 />
                 <Input
                   label="Last Name"
                   name="last_name"
                   value={formData.last_name}
-                  onChange={handleChange}
-                  required
+                  onChange={handleChange}                  
                 />
               </div>
 
@@ -140,31 +145,28 @@ const StudentRegisterForm = () => {
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
-                required
+                onChange={handleChange}                
               />
               <Input
                 label="Mobile Number"
                 type="tel"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={handleChange}                
               />
               <Input
                 label="Password"
                 type="password"
                 name="password"
                 value={formData.password}
-                onChange={handleChange}
-                required
+                onChange={handleChange}                
               />
               <Input
                 label="Confirm Password"
                 type="password"
                 name="confirmPassword"
                 value={formData.confirmPassword}
-                onChange={handleChange}
-                required
+                onChange={handleChange}                
               />
 
               <Button

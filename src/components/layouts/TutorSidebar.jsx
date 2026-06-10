@@ -41,7 +41,7 @@ const TutorSidebar = memo(({ isOpen, setIsOpen }) => {
               <BookOpen className="w-5 h-5 text-[#0fb673]" />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">TutorBook<span className="text-[#0fb673]">.</span></h2>
+              <h2 className="text-xl font-bold tracking-tight text-white">ScienceEdu<span className="text-[#0fb673]">.</span></h2>
               <p className="text-[10px] font-semibold text-[#0fb673] uppercase tracking-widest">Tutor Portal</p>
             </div>
           </div>
