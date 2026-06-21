@@ -7,18 +7,21 @@ import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { Pencil, CheckCircle, XCircle, Clock, BookOpen, Briefcase, GraduationCap, Video } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchSubjects } from '../../features/register/registerSlice';
 
 const TutorProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+  const dispatch = useDispatch();
+  const subjects = useSelector((state) => state.register.subjects);
   // Track which specific sections are in edit mode
   const [editSections, setEditSections] = useState({
     credentials: true, // We can set this to true initially if no profile exists
     bio: true
   });
-  
+
   const [formData, setFormData] = useState({
     bio: '',
     education: '',
@@ -31,6 +34,7 @@ const TutorProfile = () => {
 
   useEffect(() => {
     fetchProfile();
+    dispatch(fetchSubjects()); // Fetch subjects for dropdowns or display purposes
   }, []);
 
   const fetchProfile = async () => {
@@ -41,7 +45,7 @@ const TutorProfile = () => {
 
         console.log("Fetched profile data:", data);
         setProfile(data);
-        
+
         setFormData({
           bio: data.bio || '',
           education: data.education || '',
@@ -111,9 +115,9 @@ const TutorProfile = () => {
   };
 
   const renderStatusBadge = (status) => {
-    if (status === 'approved') return <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold"><CheckCircle className="w-4 h-4"/> Approved</span>;
-    if (status === 'rejected') return <span className="flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold"><XCircle className="w-4 h-4"/> Rejected</span>;
-    return <span className="flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold"><Clock className="w-4 h-4"/> Pending</span>;
+    if (status === 'approved') return <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold"><CheckCircle className="w-4 h-4" /> Approved</span>;
+    if (status === 'rejected') return <span className="flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold"><XCircle className="w-4 h-4" /> Rejected</span>;
+    return <span className="flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold"><Clock className="w-4 h-4" /> Pending</span>;
   };
 
   if (loading) return <LoadingSpinner fullScreen />;
@@ -128,12 +132,12 @@ const TutorProfile = () => {
       {/* 1. Static Header Card (Never in edit mode, usually comes from Users table) */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-5">
-          
+
           {/* PROFILE IMAGE LOGIC ADDED HERE */}
           <div className="w-20 h-20 rounded-full bg-[#0fb673] flex items-center justify-center flex-shrink-0 text-2xl font-bold text-white uppercase overflow-hidden">
             {profile?.profile_image ? (
-              <img 
-                src={`${UPLOADS_BASE_URL}/${profile.profile_image}`} 
+              <img
+                src={`${UPLOADS_BASE_URL}/${profile.profile_image}`}
                 alt={`${profile.first_name} ${profile.last_name}`}
                 className="w-full h-full object-cover"
               />
@@ -162,7 +166,7 @@ const TutorProfile = () => {
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-bold text-gray-900">Teaching Credentials</h3>
-          <button 
+          <button
             onClick={() => toggleSection('credentials')}
             className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
           >
@@ -174,17 +178,17 @@ const TutorProfile = () => {
           /* View Mode */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
             <div>
-              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><GraduationCap className="w-4 h-4"/> Education</p>
+              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><GraduationCap className="w-4 h-4" /> Education</p>
               <p className="text-base font-semibold text-gray-900">{formData.education || 'Not provided'}</p>
             </div>
             <div>
-              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><Briefcase className="w-4 h-4"/> Experience</p>
+              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><Briefcase className="w-4 h-4" /> Experience</p>
               <p className="text-base font-semibold text-gray-900">{formData.experience_years ? `${formData.experience_years} Years` : 'Not provided'}</p>
             </div>
-            
+
             {/* SUBJECT NAME LOGIC ADDED HERE */}
             <div>
-              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><BookOpen className="w-4 h-4"/> Subject</p>
+              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><BookOpen className="w-4 h-4" /> Subject</p>
               <p className="text-base font-semibold text-gray-900">
                 {profile?.subject_name || (formData.subject_id ? `Subject ID: ${formData.subject_id}` : 'Not specified')}
               </p>
@@ -205,7 +209,26 @@ const TutorProfile = () => {
             <Input label="Education" name="education" value={formData.education} onChange={handleChange} placeholder="e.g. B.Tech in Computer Science" />
             <Input label="Experience (Years)" type="number" name="experience_years" value={formData.experience_years} onChange={handleChange} placeholder="e.g. 2" />
             <Input label="Hourly Rate (₹)" type="number" name="hourly_rate" value={formData.hourly_rate} onChange={handleChange} placeholder="e.g. 500" />
-            <Input label="Subject ID" type="number" name="subject_id" value={formData.subject_id} onChange={handleChange} placeholder="e.g. 3" />
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-gray-700">
+                Subject
+              </label>
+
+              <select
+                name="subject_id"
+                value={formData.subject_id}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              >
+                <option value="">Select Subject</option>
+
+                {subjects?.map((subject) => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.subject_name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Input label="Teaching Mode" name="teaching_mode" value={formData.teaching_mode} onChange={handleChange} placeholder="e.g. Online, Offline" />
           </div>
         )}
@@ -215,7 +238,7 @@ const TutorProfile = () => {
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-bold text-gray-900">About & Media</h3>
-          <button 
+          <button
             onClick={() => toggleSection('bio')}
             className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
           >
@@ -233,7 +256,7 @@ const TutorProfile = () => {
               </p>
             </div>
             <div>
-              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><Video className="w-4 h-4"/> Demo Link</p>
+              <p className="flex items-center gap-2 text-sm text-gray-500 mb-1"><Video className="w-4 h-4" /> Demo Link</p>
               {formData.demo_link ? (
                 <a href={formData.demo_link} target="_blank" rel="noreferrer" className="text-[#0fb673] hover:underline font-medium">
                   {formData.demo_link}
@@ -264,16 +287,16 @@ const TutorProfile = () => {
       {/* Global Save Button - Only visible if AT LEAST ONE section is in edit mode */}
       {isAnySectionEditing && (
         <div className="fixed bottom-0 left-0 right-0 md:left-[260px] bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40 flex justify-end gap-3 px-8 animate-in slide-in-from-bottom-4">
-          <Button 
-            type="button" 
-            onClick={cancelAllEdits} 
-            className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          <Button
+            type="button"
+            onClick={cancelAllEdits}
+            className="bg-[#0fb673] text-gray-700 border border-gray-300 hover:bg-gray-50"
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            loading={saving} 
+          <Button
+            onClick={handleSubmit}
+            loading={saving}
             className="bg-[#0fb673] hover:bg-[#0da065] text-white px-8"
           >
             Save All Changes
