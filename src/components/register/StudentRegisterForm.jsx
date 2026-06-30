@@ -98,7 +98,7 @@ const StudentRegisterForm = () => {
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 rounded-[2rem] border border-white bg-white/80 px-5 py-6 shadow-sm sm:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#2f5f90]">
               Student Registration
             </p>
 
@@ -119,7 +119,7 @@ const StudentRegisterForm = () => {
                 <p className="text-sm font-semibold text-slate-500">Step 1 of 1</p>
                 <h2 className="mt-1 text-xl font-bold text-slate-950">Account details</h2>
               </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-[#2f5f90]">
                 <Sparkles className="h-5 w-5" aria-hidden="true" />
               </div>
             </div>
@@ -179,7 +179,7 @@ const StudentRegisterForm = () => {
                 type="submit"
                 loading={loading}
                 fullWidth
-                className="mt-2 bg-teal-700 py-3 hover:bg-teal-800 active:bg-teal-900"
+                className="mt-2 bg-[#1f3f66] py-3 hover:bg-[#183452] active:bg-[#12273f]"
               >
                 Create Student Account
               </Button>
@@ -189,16 +189,16 @@ const StudentRegisterForm = () => {
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-semibold text-teal-700 hover:text-teal-800 hover:underline"
+                className="font-semibold text-[#2f5f90] hover:text-[#1f3f66] hover:underline"
               >
                 Sign in
               </Link>
             </p>
           </Card>
 
-          <Card className="relative overflow-hidden rounded-[2rem] border border-teal-100 bg-gradient-to-br from-[#10283a] via-[#12333d] to-[#0f766e] p-6 text-white shadow-2xl sm:p-8">
+          <Card className="relative overflow-hidden rounded-[2rem] border border-blue-100 bg-gradient-to-br from-[#132238] via-[#1f3f66] to-[#315f91] p-6 text-white shadow-2xl shadow-blue-950/15 sm:p-8">
             <div className="relative z-10">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-200">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-100">
                 Quick Setup
               </p>
 
@@ -219,11 +219,11 @@ const StudentRegisterForm = () => {
                 ].map((item) => (
                   <div
                     key={item}
-                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm"
+                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-3 backdrop-blur-sm"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-400/20">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200/15">
                       <CheckCircle2
-                        className="h-4 w-4 shrink-0 text-teal-200"
+                        className="h-4 w-4 shrink-0 text-blue-100"
                         aria-hidden="true"
                       />
                     </div>
