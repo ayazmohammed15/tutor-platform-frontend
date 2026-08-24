@@ -33,6 +33,7 @@ import StudentPayments from './pages/student/StudentPayments';
 import AboutUs from './pages/AboutUs';
 import HowItWorks from './pages/HowItWorks';
 import GoogleConnected from './pages/tutor/GoogleConnected';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -150,7 +151,7 @@ function App() {
             element={<TutorRegistrationSuccess />}
           />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </Router>

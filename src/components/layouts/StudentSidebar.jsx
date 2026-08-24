@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, User, Calendar, FileText, CreditCard, GraduationCap, X, Settings, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, User, Calendar, FileText, CreditCard, X, Settings, ChevronDown } from 'lucide-react';
 
 const studentMenu = [
   { label: 'Dashboard', to: '/student/dashboard', icon: LayoutDashboard },
@@ -40,9 +40,7 @@ const StudentSidebar = ({ isOpen, setIsOpen }) => {
         {/* Brand Header */}
         <div className="flex items-center justify-between px-6 py-6 h-16 flex-shrink-0 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="bg-white/10 p-2 rounded-xl">
-              <GraduationCap className="w-5 h-5 text-blue-400" />
-            </div>
+            <img src="/ScienceEdu-logo.png" alt="ScienceEdu" className="h-9 w-9 rounded-xl object-cover" />
             <div>
               <h2 className="text-xl font-bold tracking-tight text-white">ScienceEdu<span className="text-blue-400">.</span></h2>
               <p className="text-[10px] font-semibold text-blue-200 uppercase tracking-widest">Student Portal</p>

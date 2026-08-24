@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Calendar, FileText, BookOpen, CreditCard, User, Settings, CalendarDays, X, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Calendar, FileText, CreditCard, User, Settings, CalendarDays, X, ChevronDown } from 'lucide-react';
 
 const tutorMenu = [
   { label: 'Dashboard', to: '/tutor/dashboard', icon: LayoutDashboard },
@@ -37,9 +37,7 @@ const TutorSidebar = memo(({ isOpen, setIsOpen }) => {
       >
         <div className="flex items-center justify-between px-6 py-6 h-16 flex-shrink-0 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="bg-white/10 p-2 rounded-xl">
-              <BookOpen className="w-5 h-5 text-[#0fb673]" />
-            </div>
+            <img src="/ScienceEdu-logo.png" alt="ScienceEdu" className="h-9 w-9 rounded-xl object-cover" />
             <div>
               <h2 className="text-xl font-bold tracking-tight text-white">ScienceEdu<span className="text-[#0fb673]">.</span></h2>
               <p className="text-[10px] font-semibold text-[#0fb673] uppercase tracking-widest">Tutor Portal</p>

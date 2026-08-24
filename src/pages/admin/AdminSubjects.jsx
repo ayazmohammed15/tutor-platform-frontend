@@ -199,7 +199,7 @@ const AdminSubjects = () => {
                 <tr>
                   <th className="px-4 py-3 font-semibold">S.No</th>
                   <th className="px-4 py-3 font-semibold">Course Name</th>
-                  <th className="px-4 py-3 font-semibold">Slug</th>
+                  {/* <th className="px-4 py-3 font-semibold">Slug</th> */}
                   <th className="px-4 py-3 font-semibold">Type</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
                   {/* <th className="px-4 py-3 font-semibold">Created</th> */}
@@ -211,7 +211,7 @@ const AdminSubjects = () => {
                     <tr key={course.id} className="hover:bg-gray-50">
                       <td className="whitespace-nowrap px-4 py-3 text-gray-600">{index + 1}</td>
                       <td className="min-w-48 px-4 py-3 font-medium text-gray-900">{course.course_name || '-'}</td>
-                      <td className="min-w-40 px-4 py-3 text-gray-600">{course.slug || '-'}</td>
+                      {/* <td className="min-w-40 px-4 py-3 text-gray-600">{course.slug || '-'}</td> */}
                       <td className="whitespace-nowrap px-4 py-3 capitalize text-gray-600">{course.course_type || '-'}</td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${Number(course.is_active) === 1 ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { CheckCircle2, Sparkles } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   registerStudent,
   resetRegisterState,
@@ -11,10 +12,13 @@ import Card from "../common/Card";
 import Input from "../common/Input";
 import Button from "../common/Button";
 
+const Motion = motion;
+
 const StudentRegisterForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.studentRegister);
+  const shouldReduceMotion = useReducedMotion();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -94,9 +98,12 @@ const StudentRegisterForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6 rounded-[2rem] border border-white bg-white/80 px-5 py-6 shadow-sm sm:px-8">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-blue-50/70 to-sky-100/70 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute -right-24 top-0 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-sky-200/40 blur-3xl" />
+      <div className="relative mx-auto max-w-5xl">
+        <Motion.div initial={shouldReduceMotion ? false : { opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: "easeOut" }} className="mb-6 rounded-[2rem] border border-white/80 bg-white/85 px-5 py-7 shadow-lg shadow-blue-950/5 backdrop-blur-sm sm:px-8">
+          <img src="/ScienceEdu-logo.png" alt="ScienceEdu" className="mx-auto h-12 w-12 rounded-xl object-cover" />
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#2f5f90]">
               Student Registration
@@ -110,10 +117,11 @@ const StudentRegisterForm = () => {
               Sign up to connect with tutors and start your learning journey.
             </p>
           </div>
-        </div>
+        </Motion.div>
 
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <Card className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <Motion.div className="h-full" initial={shouldReduceMotion ? false : { opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: shouldReduceMotion ? 0 : 0.1, ease: "easeOut" }}>
+          <Card className="h-full rounded-2xl border border-white/80 bg-white p-6 shadow-xl shadow-blue-950/5 sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div>
                 <p className="text-sm font-semibold text-slate-500">Step 1 of 1</p>
@@ -179,7 +187,7 @@ const StudentRegisterForm = () => {
                 type="submit"
                 loading={loading}
                 fullWidth
-                className="mt-2 bg-[#1f3f66] py-3 hover:bg-[#183452] active:bg-[#12273f]"
+                className="mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3 shadow-lg shadow-blue-600/20 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/25 active:translate-y-0"
               >
                 Create Student Account
               </Button>
@@ -195,8 +203,10 @@ const StudentRegisterForm = () => {
               </Link>
             </p>
           </Card>
+          </Motion.div>
 
-          <Card className="relative overflow-hidden rounded-[2rem] border border-blue-100 bg-gradient-to-br from-[#132238] via-[#1f3f66] to-[#315f91] p-6 text-white shadow-2xl shadow-blue-950/15 sm:p-8">
+          <Motion.div className="h-full" initial={shouldReduceMotion ? false : { opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: shouldReduceMotion ? 0 : 0.18, ease: "easeOut" }}>
+          <Card className="relative h-full overflow-hidden rounded-[2rem] border border-blue-100 bg-gradient-to-br from-[#132238] via-[#1f3f66] to-[#315f91] p-6 text-white shadow-2xl shadow-blue-950/15 sm:p-8">
             <div className="relative z-10">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-100">
                 Quick Setup
@@ -216,10 +226,13 @@ const StudentRegisterForm = () => {
                   "Create your student account",
                   "Sign in with your email",
                   "Connect with tutors",
-                ].map((item) => (
-                  <div
+                ].map((item, index) => (
+                  <Motion.div
                     key={item}
                     className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-3 backdrop-blur-sm"
+                    initial={shouldReduceMotion ? false : { opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.32, delay: shouldReduceMotion ? 0 : 0.35 + index * 0.08 }}
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200/15">
                       <CheckCircle2
@@ -231,11 +244,12 @@ const StudentRegisterForm = () => {
                     <span className="text-sm font-medium text-slate-100">
                       {item}
                     </span>
-                  </div>
+                  </Motion.div>
                 ))}
               </div>
             </div>
           </Card>
+          </Motion.div>
         </div>
       </div>
     </div>
