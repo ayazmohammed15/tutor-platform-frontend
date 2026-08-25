@@ -35,6 +35,17 @@ import HowItWorks from './pages/HowItWorks';
 import GoogleConnected from './pages/tutor/GoogleConnected';
 import NotFound from './pages/NotFound';
 
+// Copied AYAZ public site pages (see src/site/pages) wired in at frontend's own paths.
+import { CoursesPage } from './site/pages/CoursesPage';
+import { CourseDetailPage } from './site/pages/CourseDetailPage';
+import { TermsPage } from './site/pages/TermsPage';
+import { PrivacyPage } from './site/pages/PrivacyPage';
+import { RefundPage } from './site/pages/RefundPage';
+import { ContactPage } from './site/pages/ContactPage';
+// Note: site/pages/LoginPage.jsx and site/pages/RegisterPage.jsx are copied for
+// completeness per the migration but are NOT routed here — frontend's real
+// /login and /register (Login.jsx, Register.jsx) are wired to real backend auth.
+
 function App() {
   return (
     <Router>
@@ -71,7 +82,14 @@ function App() {
           <Route path="/register/engineering" element={<Navigate to="/register" replace />} />
           <Route path="/" element={<Home />} />
           <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/courses/:id" element={<CourseDetailPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/refund" element={<RefundPage />} />
 
           <Route
             path="/student"

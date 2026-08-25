@@ -1,6 +1,7 @@
 import { ArrowLeft, BookOpen, Home, LayoutDashboard } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { ScienceEduLogo } from "../site/components/ScienceEduLogo";
 
 const dashboardDestinations = {
   admin: { to: "/admin/dashboard", label: "Back to Admin Dashboard" },
@@ -20,9 +21,8 @@ const NotFound = () => {
       <div className="pointer-events-none absolute -bottom-28 -left-20 h-80 w-80 rounded-full bg-sky-200/45 blur-3xl" aria-hidden="true" />
 
       <section className="relative w-full max-w-3xl animate-hero-fade">
-        <Link to="/" className="mx-auto inline-flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2 text-sm font-extrabold text-slate-900 shadow-sm ring-1 ring-blue-100 transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-blue-200">
-          <img src="/ScienceEdu-logo.png" alt="" className="h-8 w-8 rounded-lg object-cover" />
-          Science<span className="text-blue-600">Edu</span>
+        <Link to="/" className="mx-auto inline-flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2 shadow-sm ring-1 ring-blue-100 transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-blue-200">
+          <ScienceEduLogo />
         </Link>
 
         <div className="relative mx-auto mt-10 flex h-32 w-32 items-center justify-center sm:h-40 sm:w-40" aria-hidden="true">
