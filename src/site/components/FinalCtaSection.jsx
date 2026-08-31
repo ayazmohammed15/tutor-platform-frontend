@@ -46,14 +46,14 @@ export const FinalCtaSection = ({
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <button
+          {/* <button
             id="final-cta-consult"
             onClick={onOpenConsultation}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold text-sm border border-slate-700 shadow-sm transition-all"
           >
             <PhoneCall className="w-4 h-4 text-blue-400" />
             <span>Speak to a Consultant</span>
-          </button>
+          </button> */}
         </div>
 
         {/* Reassurance points */}

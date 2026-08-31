@@ -131,8 +131,8 @@ export const RoleBasedPlatform = ({
                 </div>
               </div>
 
-              {/* Bottom CTA for Role */}
-              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              
+              {/* <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p className="text-xs text-slate-500 text-center sm:text-left">
                   Ready to test drive the interface? Try our interactive view.
                 </p>
@@ -153,7 +153,7 @@ export const RoleBasedPlatform = ({
                   <span>{currentRoleData.ctaText}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-              </div>
+              </div> */}
 
             </div>
 

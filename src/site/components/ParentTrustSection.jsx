@@ -130,7 +130,7 @@ export const ParentTrustSection = ({
             </div>
 
             {/* Parent CTA Button */}
-            <div className="pt-2">
+            {/* <div className="pt-2">
               <button
                 id="parent-consult-cta"
                 onClick={onOpenConsultation}
@@ -140,7 +140,7 @@ export const ParentTrustSection = ({
                 <span>Talk to a Consultant</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-            </div>
+            </div> */}
 
           </div>
 

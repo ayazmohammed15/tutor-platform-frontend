@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { tutorService } from '../../services/tutorService';
 import { Link } from 'react-router-dom';
 import {
   Mail,
@@ -30,15 +31,22 @@ export const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedTicket, setSubmittedTicket] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      setIsSubmitting(true);
+
+      const response = await tutorService.createContactInquiry(formData);
+
+      if (response?.success) {
+        setSubmittedTicket(response.data.ticket_id);
+      }
+    } catch (error) {
+      console.error('Failed to submit contact inquiry:', error);
+    } finally {
       setIsSubmitting(false);
-      const ticketId = `SE-${Math.floor(100000 + Math.random() * 900000)}`;
-      setSubmittedTicket(ticketId);
-    }, 800);
+    }
   };
 
   const offices = [
@@ -358,10 +366,10 @@ export const ContactPage = () => {
       </main>
 
       <Footer
-        onOpenFindTutor={() => {}}
-        onOpenAuth={() => {}}
-        onOpenConsultation={() => {}}
-        onOpenCourse={() => {}}
+        onOpenFindTutor={() => { }}
+        onOpenAuth={() => { }}
+        onOpenConsultation={() => { }}
+        onOpenCourse={() => { }}
       />
     </div>
   );

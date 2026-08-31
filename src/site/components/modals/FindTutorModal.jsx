@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Search,
@@ -11,30 +11,78 @@ import {
   BookOpen,
   UserCheck
 } from 'lucide-react';
-import { TUTORS_DATA } from '../../data/content';
+// import { TUTORS_DATA } from '../../data/content';
+import { tutorService } from '../../../services/tutorService';
+import { UPLOADS_BASE_URL } from '../../../services/api';
 
 export const FindTutorModal = ({
   isOpen,
   onClose,
   onSelectTutor,
-  initialQuery = ''
+  initialQuery = '',
+  initialExam = 'All'
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedSubject, setSelectedSubject] = useState('All');
-  const [selectedExam, setSelectedExam] = useState('All');
+  const [selectedExam, setSelectedExam] = useState(initialExam);
+  const [tutors, setTutors] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedExam(initialExam);
+    }
+  }, [isOpen, initialExam]);
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchTutors = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await tutorService.getPublicTutors({
+          limit: 50
+        });
+
+        const tutorData = response?.data?.tutors || [];
+
+        setTutors(tutorData);
+      } catch (error) {
+        console.error('Failed to fetch public tutors:', error);
+        setError('Unable to load tutors.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTutors();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const filteredTutors = TUTORS_DATA.filter((tutor) => {
-    const matchesQuery = !searchQuery.trim() ||
-      tutor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tutor.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tutor.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tutor.title.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredTutors = tutors.filter((tutor) => {
+    const query = searchQuery.trim().toLowerCase();
 
-    const matchesSubject = selectedSubject === 'All' || tutor.subject.toLowerCase().includes(selectedSubject.toLowerCase());
+    const matchesQuery =
+      !query ||
+      tutor.full_name?.toLowerCase().includes(query) ||
+      tutor.subject_name?.toLowerCase().includes(query) ||
+      tutor.bio?.toLowerCase().includes(query) ||
+      tutor.education?.toLowerCase().includes(query);
 
-    const matchesExam = selectedExam === 'All' || tutor.examFocus.some(f => f.toLowerCase().includes(selectedExam.toLowerCase()));
+    const matchesSubject =
+      selectedSubject === 'All' ||
+      tutor.subject_name?.toLowerCase() === selectedSubject.toLowerCase();
+
+    const matchesExam =
+      selectedExam === 'All' ||
+      tutor.exam_focus
+        ?.toLowerCase()
+        .split(',')
+        .some((exam) =>
+          exam.trim().toLowerCase().includes(selectedExam.toLowerCase())
+        );
 
     return matchesQuery && matchesSubject && matchesExam;
   });
@@ -68,7 +116,7 @@ export const FindTutorModal = ({
         {/* Filter Controls Bar */}
         <div className="p-4 sm:p-5 border-b border-slate-100 bg-white grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Search Input */}
-          <div className="relative">
+          {/* <div className="relative">
             <input
               type="text"
               value={searchQuery}
@@ -77,7 +125,7 @@ export const FindTutorModal = ({
               className="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-blue-500"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
+          </div> */}
 
           {/* Subject Filter */}
           <select
@@ -108,7 +156,15 @@ export const FindTutorModal = ({
 
         {/* Tutor Cards List */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-slate-50/50">
-          {filteredTutors.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12 text-slate-500 text-sm">
+              Loading verified tutors...
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-500 text-sm">
+              {error}
+            </div>
+          ) : filteredTutors.length === 0 ? (
             <div className="text-center py-12 space-y-3">
               <p className="text-slate-500 text-sm">No verified tutors matched your filter criteria.</p>
               <button
@@ -126,37 +182,43 @@ export const FindTutorModal = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredTutors.map((tutor) => (
                 <div
-                  key={tutor.id}
+                  key={tutor.tutor_profile_id}
                   className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
                 >
                   <div className="flex items-start gap-3.5">
                     <img
-                      src={tutor.image}
-                      alt={tutor.name}
+                      src={
+                        tutor.profile_image
+                          ? `${UPLOADS_BASE_URL}/${tutor.profile_image}`
+                          : '/default-tutor.png'
+                      }
+                      alt={tutor.full_name}
                       referrerPolicy="no-referrer"
                       className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <h4 className="text-sm font-semibold text-slate-900 truncate">
-                          {tutor.name}
+                          {tutor.full_name}
                         </h4>
-                        <div className="flex items-center gap-1 text-xs font-bold text-amber-600">
+                        {/* <div className="flex items-center gap-1 text-xs font-bold text-amber-600">
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                           <span>{tutor.rating}</span>
-                        </div>
+                        </div> */}
                       </div>
 
                       <p className="text-xs text-slate-500 truncate mt-0.5">
-                        {tutor.title}
+                        {tutor.education || 'Experienced Educator'}
                       </p>
 
                       <div className="flex items-center gap-2 text-[11px] text-slate-600 mt-1">
                         <span className="font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
-                          {tutor.subject}
+                          {tutor.subject_name}
                         </span>
                         <span>•</span>
-                        <span>{tutor.experience}</span>
+                        <span>{tutor.experience_years
+                          ? `${tutor.experience_years} years experience`
+                          : 'Experienced Tutor'}</span>
                       </div>
                     </div>
                   </div>
@@ -166,20 +228,25 @@ export const FindTutorModal = ({
                   </p>
 
                   <div className="flex flex-wrap gap-1">
-                    {tutor.examFocus.map((f, idx) => (
-                      <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                        {f}
-                      </span>
-                    ))}
+                    {tutor.exam_focus
+                      ?.split(',')
+                      .map((focus, idx) => (
+                        <span
+                          key={idx}
+                          className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
+                        >
+                          {focus.trim()}
+                        </span>
+                      ))}
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div>
                       <span className="text-[10px] text-slate-400 block font-medium">Session Fee</span>
-                      <span className="text-sm font-extrabold text-blue-900">{tutor.hourlyRate}</span>
+                      <span className="text-sm font-extrabold text-blue-900">₹{tutor.hourly_rate || 'N/A'}/hr</span>
                     </div>
 
-                    <button
+                    {/* <button
                       onClick={() => {
                         onClose();
                         onSelectTutor(tutor);
@@ -188,7 +255,7 @@ export const FindTutorModal = ({
                     >
                       <span>Book Slot</span>
                       <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               ))}

@@ -102,13 +102,13 @@ export const AboutPage = () => {
                 <span>Explore Programs</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
+              {/* <Link
                 to="/contact"
                 className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 font-semibold text-sm transition-all inline-flex items-center gap-2"
               >
                 <PhoneCall className="w-4 h-4" />
                 <span>Talk to Academic Advisor</span>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </section>

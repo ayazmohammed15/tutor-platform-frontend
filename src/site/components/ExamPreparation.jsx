@@ -1,11 +1,119 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle, Award, Sparkles, Compass } from 'lucide-react';
-import { COURSES_DATA } from '../data/content';
+// import { COURSES_DATA } from '../data/content';
+import { tutorService } from '../../services/tutorService';
+import { IMAGES } from '../data/images';
 
 export const ExamPreparation = ({
   onSelectCourse,
   onOpenFindTutor
 }) => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+
+        const response = await tutorService.getCourses();
+
+        setCourses(response || []);
+      } catch (error) {
+        console.error('Failed to fetch courses:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  const getCourseDisplayData = (course) => {
+    const courseName = course.course_name?.toLowerCase() || '';
+
+    if (courseName.includes('jee')) {
+      return {
+        image: IMAGES.examJeePrep,
+        badge: 'Engineering Entrance',
+        targetClass: 'Classes 11th, 12th & Repeaters',
+        batchSize: 'Personalized 1-on-1 & Micro-groups',
+        description:
+          'Learn concepts, practice numericals, and plan your preparation with expert tutors specializing in Physics, Chemistry, and Mathematics.',
+        features: [
+          'Chapter-wise numerical practice',
+          'JEE-focused preparation',
+          'Expert subject tutors'
+        ],
+        mentorName: 'Expert IIT-JEE Faculty'
+      };
+    }
+
+    if (courseName.includes('neet')) {
+      return {
+        image: IMAGES.examNeetPrep,
+        badge: 'Medical Entrance',
+        targetClass: 'Classes 11th, 12th & Droppers',
+        batchSize: '1-on-1 or Micro-groups',
+        description:
+          'Get focused Biology, Chemistry, and Physics support for your medical entrance goals with structured NEET preparation.',
+        features: [
+          'NCERT-focused preparation',
+          'Physics, Chemistry & Biology',
+          'NEET-focused practice'
+        ],
+        mentorName: 'Expert NEET Faculty'
+      };
+    }
+
+    if (courseName.includes('foundation')) {
+      return {
+        image: IMAGES.examIitFoundation,
+        badge: 'Strong Core Foundation',
+        targetClass: 'Classes 7th to 10th',
+        batchSize: '1-on-1 or Small Batch',
+        description:
+          'Strengthen problem solving with structured Mathematics and Science mentoring designed to build a strong competitive foundation.',
+        features: [
+          'Strong conceptual foundation',
+          'Competitive exam readiness',
+          'Personalized mentor support'
+        ],
+        mentorName: 'Foundation Faculty'
+      };
+    }
+
+    if (courseName.includes('cbse')) {
+      return {
+        image: IMAGES.examIitFoundation,
+        badge: 'CBSE',
+        targetClass: 'School Classes',
+        batchSize: 'CBSE Preparation',
+        description:
+          'Structured CBSE learning with subject-focused guidance from experienced tutors.',
+        features: [
+          'CBSE curriculum support',
+          'Subject-wise preparation',
+          'Exam-focused practice'
+        ],
+        mentorName: 'CBSE Faculty'
+      };
+    }
+
+    return {
+      image: IMAGES.examIitFoundation,
+      badge: 'School',
+      targetClass: 'School Classes',
+      batchSize: 'School Tuition',
+      description:
+        'Personalized school tuition designed to strengthen concepts and improve academic performance.',
+      features: [
+        'Subject-wise learning',
+        'Concept clarification',
+        'Personalized tutor support'
+      ],
+      mentorName: 'Expert School Faculty'
+    };
+  };
   return (
     <section id="courses" className="py-20 bg-slate-50 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,88 +134,89 @@ export const ExamPreparation = ({
 
         {/* Three Large Visual Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {COURSES_DATA.map((course) => {
-            const isJee = course.id === 'jee-main-prep';
-            const isNeet = course.id === 'neet-prep';
-            const isFoundation = course.id === 'iit-foundation';
+          {loading ? (
+            <div className="col-span-full text-center py-10 text-slate-500 text-sm">
+              Loading courses...
+            </div>
+          ) : (
+            courses.map((course) => {
+              const displayData = getCourseDisplayData(course);
 
-            return (
-              <div
-                key={course.id}
-                id={`exam-card-${course.id}`}
-                className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group"
-              >
-                {/* Large Photography Container */}
-                <div className="relative h-60 overflow-hidden bg-slate-900">
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+              return (
+                <div
+                  key={course.id}
+                  id={`exam-card-${course.id}`}
+                  className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group"
+                >
+                  {/* Large Photography Container */}
+                  <div className="relative h-60 overflow-hidden bg-slate-900">
+                    <img
+                      src={displayData.image}
+                      alt={course.course_name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
 
-                  {/* Top Badge */}
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase bg-blue-600/90 text-white backdrop-blur-md shadow-sm">
-                      {course.badge}
-                    </span>
-                  </div>
+                    {/* Top Badge */}
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase bg-blue-600/90 text-white backdrop-blur-md shadow-sm">
+                        {displayData.badge}
+                      </span>
+                    </div>
 
-                  {/* Target Class Pill */}
-                  <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white text-xs">
-                    <span className="font-semibold bg-slate-900/70 backdrop-blur-xs px-2.5 py-1 rounded-md">
-                      {course.targetClass}
-                    </span>
-                    <span className="text-blue-300 font-medium">
-                      {course.batchSize}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Content Body */}
-                <div className="p-6 flex-1 flex flex-col justify-between space-y-5">
-                  <div className="space-y-3">
-                    <h3 className="text-xl font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
-                      {course.title}
-                    </h3>
-
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      {course.description}
-                    </p>
-
-                    {/* Key Highlights */}
-                    <div className="pt-2 space-y-1.5">
-                      {course.features.slice(0, 3).map((feat, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-xs text-slate-700">
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                          <span>{feat}</span>
-                        </div>
-                      ))}
+                    {/* Target Class Pill */}
+                    <div className="absolute bottom-3 left-4 right-4 flex items-center text-white text-xs">
+                      <span className="font-semibold bg-slate-900/70 backdrop-blur-xs px-2.5 py-1 rounded-md">
+                        {displayData.targetClass}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Mentors and CTA */}
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                    <div>
-                      <span className="text-[11px] text-slate-400 block font-medium">Faculty Leads</span>
-                      <span className="text-xs font-semibold text-slate-800 line-clamp-1">{course.mentorName}</span>
+                  {/* Card Content Body */}
+                  <div className="p-6 flex-1 flex flex-col justify-between space-y-5">
+                    <div className="space-y-3">
+                      <h3 className="text-xl font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
+                        {course.course_name}
+                      </h3>
+
+                      <p className="text-sm text-slate-600 leading-relaxed">
+                        {displayData.description}
+                      </p>
+
+                      {/* Key Highlights */}
+                      <div className="pt-2 space-y-1.5">
+                        {displayData.features.slice(0, 3).map((feat, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-xs text-slate-700">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                            <span>{feat}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    <button
-                      id={`explore-btn-${course.id}`}
-                      onClick={() => onSelectCourse(course.id)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-xs transition-all shrink-0"
-                    >
-                      <span>Explore More</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                    {/* Mentors and CTA */}
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[11px] text-slate-400 block font-medium">Faculty Leads</span>
+                        <span className="text-xs font-semibold text-slate-800 line-clamp-1">{displayData.mentorName}</span>
+                      </div>
 
+                      <button
+                        id={`explore-btn-${course.id}`}
+                        onClick={() => onSelectCourse(course.id)}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-xs transition-all shrink-0"
+                      >
+                        <span>Explore More</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Quick Help Strip under Exam Cards */}

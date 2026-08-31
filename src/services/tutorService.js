@@ -11,6 +11,34 @@ export const tutorService = {
     return response.data;
   },
 
+  getPublicTutors: async (filters = {}) => {
+    const params = new URLSearchParams();
+
+    if (filters.limit) {
+      params.append('limit', filters.limit);
+    }
+
+    if (filters.subject_id) {
+      params.append('subject_id', filters.subject_id);
+    }
+
+    if (filters.class_id) {
+      params.append('class_id', filters.class_id);
+    }
+
+    if (filters.search?.trim()) {
+      params.append('search', filters.search.trim());
+    }
+
+    const query = params.toString();
+
+    const response = await api.get(
+      query ? `/tutors/public?${query}` : '/tutors/public'
+    );
+
+    return response.data;
+  },
+
   updateProfile: async (updates) => {
     const response = await api.put('/tutors/profile', updates);
     return response.data;
@@ -19,12 +47,12 @@ export const tutorService = {
   searchTutors: async (filters = {}) => {
     const params = new URLSearchParams();
 
-    if (filters.search?.trim())         params.append('search', filters.search.trim());
-    if (filters.course_id)              params.append('course_id', filters.course_id);
-    if (filters.class_id)               params.append('class_id', filters.class_id);
-    if (filters.subject_id)             params.append('subject_id', filters.subject_id);
-    if (filters.qualification?.trim())  params.append('qualification', filters.qualification.trim());
-    if (filters.min_experience)         params.append('min_experience', filters.min_experience);
+    if (filters.search?.trim()) params.append('search', filters.search.trim());
+    if (filters.course_id) params.append('course_id', filters.course_id);
+    if (filters.class_id) params.append('class_id', filters.class_id);
+    if (filters.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters.qualification?.trim()) params.append('qualification', filters.qualification.trim());
+    if (filters.min_experience) params.append('min_experience', filters.min_experience);
 
     const query = params.toString();
     const response = await api.get(query ? `/tutors/search?${query}` : '/tutors/search');
@@ -62,7 +90,15 @@ export const tutorService = {
   getStudents: async () => {
     const res = await api.get("/admin/students");
     return res.data;
-  }
+  },
+  createContactInquiry: async (inquiryData) => {
+    const response = await api.post('/contact/inquiries', inquiryData);
+    return response.data;
+  },
+  getCourses: async () => {
+    const response = await api.get('/courses');
+    return response.data;
+  },
 
   // getPendingTutors: () =>
   //   api.get("/admin/pending-tutors"),

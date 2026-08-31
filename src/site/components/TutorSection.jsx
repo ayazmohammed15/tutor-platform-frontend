@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Star,
   ShieldCheck,
@@ -10,19 +10,61 @@ import {
   GraduationCap,
   Sparkles
 } from 'lucide-react';
-import { TUTORS_DATA } from '../data/content';
+// import { TUTORS_DATA } from '../data/content';
+import { tutorService } from '../../services/tutorService';
+import { UPLOADS_BASE_URL } from '../../services/api';
 
 export const TutorSection = ({
   onSelectTutor,
   onOpenAllTutorsModal
 }) => {
   const [selectedSubject, setSelectedSubject] = useState('All');
+  const [tutors, setTutors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    const fetchTutors = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await tutorService.getPublicTutors({
+          limit: 50
+        });
+
+        const tutorData = response?.data?.tutors || [];
+
+        setTutors(tutorData);
+      } catch (error) {
+        console.error('Failed to fetch public tutors:', error);
+        setError('Unable to load tutors.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTutors();
+  }, []);
 
   const subjects = ['All', 'Physics', 'Mathematics', 'Biology', 'Chemistry'];
 
-  const filteredTutors = selectedSubject === 'All'
-    ? TUTORS_DATA
-    : TUTORS_DATA.filter(t => t.subject.toLowerCase().includes(selectedSubject.toLowerCase()));
+  const filteredTutors =
+    selectedSubject === 'All'
+      ? tutors
+      : tutors.filter(
+        (tutor) =>
+          tutor.subject_name?.toLowerCase() ===
+          selectedSubject.toLowerCase()
+      );
+
+  console.log('UPLOADS_BASE_URL:', UPLOADS_BASE_URL);
+  console.log('Tutor image:', tutors[0]?.profile_image);
+  console.log(
+    'Full image URL:',
+    tutors[0]?.profile_image
+      ? `${UPLOADS_BASE_URL}/${tutors[0].profile_image}`
+      : null
+  );
 
   return (
     <section id="tutors" className="py-20 bg-white relative">
@@ -48,11 +90,10 @@ export const TutorSection = ({
                 key={sub}
                 id={`tutor-filter-${sub.toLowerCase()}`}
                 onClick={() => setSelectedSubject(sub)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  selectedSubject === sub
-                    ? 'bg-blue-700 text-white shadow-sm'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${selectedSubject === sub
+                  ? 'bg-blue-700 text-white shadow-sm'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  }`}
               >
                 {sub}
               </button>
@@ -64,16 +105,20 @@ export const TutorSection = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredTutors.map((tutor) => (
             <div
-              key={tutor.id}
-              id={`tutor-card-${tutor.id}`}
+              key={tutor.tutor_profile_id}
+              id={`tutor-card-${tutor.tutor_profile_id}`}
               className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group p-5"
             >
               {/* Top: Portrait & Badge */}
               <div>
                 <div className="relative rounded-xl overflow-hidden aspect-[4/3] bg-slate-900 mb-4">
                   <img
-                    src={tutor.image}
-                    alt={tutor.name}
+                    src={
+                      tutor.profile_image
+                        ? `${UPLOADS_BASE_URL}/${tutor.profile_image}`
+                        : '/default-tutor.png'
+                    }
+                    alt={tutor.full_name}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   />
@@ -90,7 +135,7 @@ export const TutorSection = ({
                   {/* Subject Tag on Image */}
                   <div className="absolute bottom-2.5 left-2.5">
                     <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-600 text-white shadow-xs">
-                      {tutor.subject}
+                      {tutor.subject_name}
                     </span>
                   </div>
                 </div>
@@ -99,32 +144,34 @@ export const TutorSection = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <h3 className="text-base font-semibold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
-                      {tutor.name}
+                      {tutor.full_name}
                     </h3>
-                    <div className="flex items-center gap-1 text-xs font-bold text-amber-600 shrink-0">
+                    {/* <div className="flex items-center gap-1 text-xs font-bold text-amber-600 shrink-0">
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                       <span>{tutor.rating}</span>
-                    </div>
+                    </div> */}
                   </div>
 
                   <p className="text-xs text-slate-500 line-clamp-1">
-                    {tutor.title}
+                    {tutor.education || 'Experienced Educator'}
                   </p>
 
                   <div className="flex items-center gap-3 text-[11px] text-slate-600 pt-1">
-                    <span className="font-medium">{tutor.experience}</span>
+                    <span className="font-medium">{tutor.experience_years
+                      ? `${tutor.experience_years} years experience`
+                      : 'Experienced Tutor'}</span>
                     <span>•</span>
-                    <span className="font-semibold text-slate-700">{tutor.classesTaught}+ Classes</span>
+                    <span className="font-semibold text-slate-700">{tutor.classes || 'Classes not specified'}</span>
                   </div>
 
-                  {/* Exam Tags */}
+                  {/* Exam Tags
                   <div className="flex flex-wrap gap-1 pt-1.5">
                     {tutor.examFocus.map((focus, i) => (
                       <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">
                         {focus}
                       </span>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
               </div>
 

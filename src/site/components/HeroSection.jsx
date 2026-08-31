@@ -86,10 +86,10 @@ export const HeroSection = ({
                 <span className="inline-flex items-center gap-1 text-blue-700">
                   <Video className="w-3.5 h-3.5" /> Live Classes
                 </span>
-                <span className="text-slate-300">•</span>
+                {/* <span className="text-slate-300">•</span>
                 <span className="inline-flex items-center gap-1 text-indigo-700">
                   <ShieldCheck className="w-3.5 h-3.5" /> Secure Payments
-                </span>
+                </span> */}
                 <span className="text-slate-300">•</span>
                 <span className="inline-flex items-center gap-1 text-slate-700">
                   <Zap className="w-3.5 h-3.5 text-amber-500" /> Google Meet
@@ -98,7 +98,7 @@ export const HeroSection = ({
             </div>
 
             {/* Quick Consultation Ribbon */}
-            <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-3 flex items-center justify-between gap-3 text-left">
+            {/* <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-3 flex items-center justify-between gap-3 text-left">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-blue-600/10 text-blue-700 flex items-center justify-center shrink-0">
                   <Calendar className="w-4 h-4" />
@@ -115,7 +115,7 @@ export const HeroSection = ({
               >
                 Book Free
               </button>
-            </div>
+            </div> */}
 
           </div>
 
