@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Search,
   Calendar,
@@ -8,13 +9,13 @@ import {
   ShieldCheck,
   Sparkles,
   ChevronRight,
-  UserCheck,
   Zap
 } from 'lucide-react';
 import { IMAGES } from '../data/images';
 
 export const HowItWorks = ({ onStartBooking }) => {
   const [activeStep, setActiveStep] = useState(0);
+  const reduceMotion = useReducedMotion();
 
   const steps = [
     {
@@ -129,7 +130,14 @@ export const HowItWorks = ({ onStartBooking }) => {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 bg-slate-50/60 relative overflow-hidden">
+    <motion.section
+      id="how-it-works"
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-slate-50/60 relative overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -159,9 +167,13 @@ export const HowItWorks = ({ onStartBooking }) => {
               const isActive = activeStep === idx;
 
               return (
-                <div
+                <motion.div
                   key={idx}
                   id={`how-step-${idx}`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+                  whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ delay: idx * 0.08, duration: 0.45 }}
                   onClick={() => setActiveStep(idx)}
                   onMouseEnter={() => setActiveStep(idx)}
                   className={`group relative flex flex-col justify-between rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${
@@ -233,7 +245,7 @@ export const HowItWorks = ({ onStartBooking }) => {
                   <div className={`h-1 w-full transition-all duration-300 ${
                     isActive ? 'bg-blue-600' : 'bg-transparent group-hover:bg-slate-200'
                   }`} />
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -241,7 +253,13 @@ export const HowItWorks = ({ onStartBooking }) => {
         </div>
 
         {/* Interactive Bottom Journey Action */}
-        <div className="mt-14 text-center">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.08, duration: 0.45 }}
+          className="mt-14 text-center"
+        >
           <button
             id="how-it-works-start-cta"
             onClick={onStartBooking}
@@ -250,9 +268,9 @@ export const HowItWorks = ({ onStartBooking }) => {
             <span>Start Your Learning Journey — Find a Tutor</span>
             <ArrowRight className="w-4 h-4" />
           </button>
-        </div>
+        </motion.div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

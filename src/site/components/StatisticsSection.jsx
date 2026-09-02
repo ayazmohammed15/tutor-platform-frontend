@@ -1,7 +1,9 @@
 import React from 'react';
-import { ShieldCheck, Video, Calendar, Users, Award, BookOpen } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ShieldCheck, Video, Calendar, BookOpen } from 'lucide-react';
 
 export const StatisticsSection = () => {
+  const reduceMotion = useReducedMotion();
   const metrics = [
     {
       label: 'Verified Tutors',
@@ -34,16 +36,26 @@ export const StatisticsSection = () => {
   ];
 
   return (
-    <section className="bg-slate-900 text-white py-16 border-y border-slate-800 relative">
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="bg-slate-900 text-white py-16 border-y border-slate-800 relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {metrics.map((metric, idx) => {
             const Icon = metric.icon;
             return (
-              <div
+              <motion.div
                 key={idx}
                 id={`stat-metric-${idx}`}
+                initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: idx * 0.08, duration: 0.45 }}
                 className="bg-slate-800/60 rounded-2xl p-6 border border-slate-700/70 text-center flex flex-col items-center justify-center space-y-2 hover:border-slate-600 transition-colors"
               >
                 <div className={`w-12 h-12 rounded-xl bg-slate-900/80 flex items-center justify-center mb-1 ${metric.color}`}>
@@ -58,12 +70,12 @@ export const StatisticsSection = () => {
                 <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
                   {metric.subtext}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   CheckCircle2,
   Star,
@@ -8,7 +9,6 @@ import {
   ShieldCheck,
   Sparkles,
   BookOpen,
-  Calendar,
   Zap,
   Users
 } from 'lucide-react';
@@ -19,9 +19,14 @@ export const HeroSection = ({
   onExploreCoursesClick,
   onOpenConsultation,
 }) => {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section
+    <motion.section
       id="home"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={reduceMotion ? undefined : { opacity: 1 }}
+      transition={{ duration: 0.45 }}
       className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/40 overflow-hidden"
     >
       {/* Subtle Academic Background Grid & Glow */}
@@ -32,30 +37,55 @@ export const HeroSection = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
           {/* Left Column: Hero Copy & Actions */}
-          <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: -28 }}
+            animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-6 space-y-6 text-center lg:text-left"
+          >
 
             {/* Eyebrow badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-800 text-xs font-bold tracking-wider uppercase shadow-xs">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ delay: 0.08, duration: 0.45 }}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-800 text-xs font-bold tracking-wider uppercase shadow-xs"
+            >
               <Sparkles className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
               <span>LEARN FROM THE BEST</span>
-            </div>
+            </motion.div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl xl:text-6xl font-semibold text-slate-900 tracking-tight leading-[1.12]">
+            <motion.h1
+              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ delay: 0.12, duration: 0.55 }}
+              className="text-4xl sm:text-5xl xl:text-6xl font-semibold text-slate-900 tracking-tight leading-[1.12]"
+            >
               Learn Better.{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800">
                 Prepare Smarter.
               </span>{' '}
               Achieve More.
-            </h1>
+            </motion.h1>
 
             {/* Supporting Subtext */}
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0 font-normal">
+            <motion.p
+              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ delay: 0.18, duration: 0.55 }}
+              className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0 font-normal"
+            >
               Connect with verified tutors, join structured courses, and prepare for JEE, NEET, IIT Foundation, and competitive exams through personalized online learning.
-            </p>
+            </motion.p>
 
             {/* Primary & Secondary Action CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ delay: 0.26, duration: 0.5 }}
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2"
+            >
               <button
                 id="hero-find-tutor-btn"
                 onClick={onFindTutorClick}
@@ -74,10 +104,15 @@ export const HeroSection = ({
                 <BookOpen className="w-4 h-4 text-blue-600" />
                 <span>Explore Courses</span>
               </button>
-            </div>
+            </motion.div>
 
             {/* Trust statement & pills */}
-            <div className="pt-4 border-t border-slate-200/80">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ delay: 0.32, duration: 0.5 }}
+              className="pt-4 border-t border-slate-200/80"
+            >
               <p className="text-xs font-semibold text-slate-700 flex flex-wrap items-center justify-center lg:justify-start gap-x-2 gap-y-1.5">
                 <span className="inline-flex items-center gap-1 text-emerald-700">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Verified Tutors
@@ -95,7 +130,7 @@ export const HeroSection = ({
                   <Zap className="w-3.5 h-3.5 text-amber-500" /> Google Meet
                 </span>
               </p>
-            </div>
+            </motion.div>
 
             {/* Quick Consultation Ribbon */}
             {/* <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-3 flex items-center justify-between gap-3 text-left">
@@ -117,10 +152,15 @@ export const HeroSection = ({
               </button>
             </div> */}
 
-          </div>
+          </motion.div>
 
           {/* Right Column: High-End Photorealistic Composition with Floating SaaS UI */}
-          <div className="lg:col-span-6 relative">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: 28 }}
+            animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            className="lg:col-span-6 relative"
+          >
             <div className="relative mx-auto max-w-lg lg:max-w-none">
 
               {/* Main Photo Container with Decorative Framing */}
@@ -170,7 +210,12 @@ export const HeroSection = ({
               </div>
 
               {/* Floating UI Element 1: Top Right - Verified Tutor Badge */}
-              <div className="absolute -top-4 -right-2 sm:-right-4 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-xl border border-slate-100 flex items-center gap-3 animate-in fade-in zoom-in duration-500 z-10">
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: -12 }}
+                animate={reduceMotion ? undefined : { opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.45 }}
+                className="absolute -top-4 -right-2 sm:-right-4 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-xl border border-slate-100 flex items-center gap-3 z-10"
+              >
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
@@ -188,10 +233,15 @@ export const HeroSection = ({
                     <span className="text-slate-600 font-bold ml-1">4.9/5</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Floating UI Element 2: Middle Left - Live Class / JEE Prep */}
-              <div className="absolute top-1/3 -left-3 sm:-left-6 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-xl border border-slate-100 flex items-center gap-3 z-10 hidden sm:flex">
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, x: -18, y: 18 }}
+                animate={reduceMotion ? undefined : { opacity: 1, x: 0, y: 0 }}
+                transition={{ delay: 0.52, duration: 0.5 }}
+                className="absolute top-1/3 -left-3 sm:-left-6 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-xl border border-slate-100 flex items-center gap-3 z-10 hidden sm:flex"
+              >
                 <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
                   <Video className="w-4 h-4" />
                 </div>
@@ -200,10 +250,15 @@ export const HeroSection = ({
                   <p className="text-xs font-bold text-slate-800">JEE Preparation</p>
                   <p className="text-[10px] text-slate-500">Google Meet Connected</p>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Floating UI Element 3: Bottom Right - 120+ Sessions */}
-              <div className="absolute -bottom-5 -right-2 sm:-right-4 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-xl border border-slate-100 flex items-center gap-3 z-10">
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 20 }}
+                animate={reduceMotion ? undefined : { opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.48 }}
+                className="absolute -bottom-5 -right-2 sm:-right-4 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-xl border border-slate-100 flex items-center gap-3 z-10"
+              >
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
                   <Users className="w-5 h-5" />
                 </div>
@@ -211,13 +266,13 @@ export const HeroSection = ({
                   <span className="text-xs font-extrabold text-slate-900">120+ Sessions</span>
                   <p className="text-[11px] text-slate-500">Conducted This Week</p>
                 </div>
-              </div>
+              </motion.div>
 
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 };

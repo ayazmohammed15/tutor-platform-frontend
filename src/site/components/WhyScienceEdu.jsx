@@ -1,8 +1,10 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ShieldCheck, CalendarRange, Video, LayoutGrid, Sparkles } from 'lucide-react';
 import { IMAGES } from '../data/images';
 
 export const WhyScienceEdu = () => {
+  const reduceMotion = useReducedMotion();
   const features = [
     {
       icon: ShieldCheck,
@@ -31,7 +33,14 @@ export const WhyScienceEdu = () => {
   ];
 
   return (
-    <section id="why-science-edu" className="py-20 bg-white relative overflow-hidden">
+    <motion.section
+      id="why-science-edu"
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-white relative overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Heading */}
@@ -52,7 +61,13 @@ export const WhyScienceEdu = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
           {/* Left: Large Editorial Photograph */}
-          <div className="lg:col-span-6 relative">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: -26 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-6 relative"
+          >
             <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-slate-900 group">
               <img
                 src={IMAGES.whyTeacherTeaching}
@@ -79,17 +94,27 @@ export const WhyScienceEdu = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right: 4 Detailed Feature Blocks */}
-          <div className="lg:col-span-6 space-y-6">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: 26 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-6 space-y-6"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {features.map((feat, idx) => {
                 const Icon = feat.icon;
                 return (
-                  <div
+                  <motion.div
                     key={idx}
                     id={`why-feature-${idx}`}
+                    initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ delay: idx * 0.08, duration: 0.45 }}
                     className="p-5 rounded-xl bg-slate-50 hover:bg-white border border-slate-200/80 hover:border-blue-200 hover:shadow-md transition-all duration-200 flex flex-col justify-start"
                   >
                     <div className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-3.5 ${feat.accent}`}>
@@ -101,23 +126,29 @@ export const WhyScienceEdu = () => {
                     <p className="text-xs text-slate-600 leading-relaxed font-normal">
                       {feat.desc}
                     </p>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
 
             {/* Bottom highlight pill */}
-            <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900 flex items-center gap-3">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ delay: 0.12, duration: 0.45 }}
+              className="p-4 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900 flex items-center gap-3"
+            >
               <ShieldCheck className="w-5 h-5 text-blue-700 shrink-0" />
               <span>
                 <strong>100% Verified Profile Guarantee:</strong> Every tutor’s credentials, degree certificates, and teaching demo are vetted by our academic council.
               </span>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

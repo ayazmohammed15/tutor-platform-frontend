@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { ChevronDown, HelpCircle, Search, Sparkles } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ChevronDown, HelpCircle, Search } from 'lucide-react';
 import { FAQ_DATA } from '../data/content';
 
 export const FaqSection = () => {
   const [openFaqId, setOpenFaqId] = useState('faq-1');
   const [faqSearch, setFaqSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const reduceMotion = useReducedMotion();
 
   const categories = ['All', 'Tutors', 'Subjects', 'Classes', 'Booking & Payments'];
 
@@ -22,7 +24,14 @@ export const FaqSection = () => {
   };
 
   return (
-    <section id="faq-section" className="py-20 bg-white relative">
+    <motion.section
+      id="faq-section"
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-white relative"
+    >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -71,12 +80,16 @@ export const FaqSection = () => {
 
         {/* Accordion List */}
         <div className="space-y-3">
-          {filteredFaqs.map((faq) => {
+          {filteredFaqs.map((faq, index) => {
             const isOpen = openFaqId === faq.id;
             return (
-              <div
+              <motion.div
                 key={faq.id}
                 id={`faq-item-${faq.id}`}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.04, duration: 0.4 }}
                 className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 hover:border-slate-300 transition-all duration-200"
               >
                 <button
@@ -101,12 +114,12 @@ export const FaqSection = () => {
                     </div>
                   </div>
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { User, Users, Layers, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { IMAGES } from '../data/images';
 
@@ -6,6 +7,7 @@ export const LearningOptions = ({
   onOpenFindTutor,
   onExploreCourses
 }) => {
+  const reduceMotion = useReducedMotion();
   const options = [
     {
       id: 'one-to-one',
@@ -61,7 +63,13 @@ export const LearningOptions = ({
   ];
 
   return (
-    <section className="py-20 bg-slate-50 relative">
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-slate-50 relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -79,12 +87,16 @@ export const LearningOptions = ({
 
         {/* 3 Distinct Visual Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {options.map((option) => {
+          {options.map((option, index) => {
             const Icon = option.icon;
             return (
-              <div
+              <motion.div
                 key={option.id}
                 id={`learning-option-${option.id}`}
+                initial={reduceMotion ? false : { opacity: 0, y: 26 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.08, duration: 0.5 }}
                 className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group"
               >
                 {/* Large Photograph */}
@@ -136,12 +148,12 @@ export const LearningOptions = ({
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

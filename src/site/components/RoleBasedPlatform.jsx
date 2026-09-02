@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
-import {
-  User,
-  GraduationCap,
-  ShieldAlert,
-  CheckCircle2,
-  ArrowRight,
-  Sparkles,
-  Users,
-  Briefcase,
-  ShieldCheck
-} from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { User, CheckCircle2, Sparkles, Briefcase } from 'lucide-react';
 import { ROLE_FEATURES } from '../data/content';
 
 export const RoleBasedPlatform = ({
@@ -17,11 +8,19 @@ export const RoleBasedPlatform = ({
   onOpenFindTutor,
 }) => {
   const [selectedRole, setSelectedRole] = useState('students');
+  const reduceMotion = useReducedMotion();
 
   const currentRoleData = ROLE_FEATURES.find(r => r.id === selectedRole) || ROLE_FEATURES[0];
 
   return (
-    <section id="role-dashboards" className="py-20 bg-slate-50 relative">
+    <motion.section
+      id="role-dashboards"
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-slate-50 relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -68,11 +67,23 @@ export const RoleBasedPlatform = ({
         </div>
 
         {/* Active Role Visual & Feature Breakdown */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.98 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
 
             {/* Left: Distinct Human Photograph for the Role */}
-            <div className="lg:col-span-5 relative bg-slate-900 min-h-[350px] lg:min-h-[480px]">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, x: -22 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.55 }}
+              className="lg:col-span-5 relative bg-slate-900 min-h-[350px] lg:min-h-[480px]"
+            >
               <img
                 src={currentRoleData.image}
                 alt={currentRoleData.imageAlt}
@@ -94,10 +105,16 @@ export const RoleBasedPlatform = ({
                   {currentRoleData.subtitle}
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right: Role Feature Grid & Action Button */}
-            <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between space-y-8">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, x: 22 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.55 }}
+              className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between space-y-8"
+            >
               <div>
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                   <div>
@@ -113,8 +130,12 @@ export const RoleBasedPlatform = ({
                 {/* 6 Grid Features */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {currentRoleData.features.map((item, idx) => (
-                    <div
+                    <motion.div
                       key={idx}
+                      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{ delay: idx * 0.06, duration: 0.4 }}
                       className="p-3.5 rounded-xl bg-slate-50 hover:bg-blue-50/50 border border-slate-100 transition-colors space-y-1"
                     >
                       <div className="flex items-center gap-2">
@@ -126,7 +147,7 @@ export const RoleBasedPlatform = ({
                       <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
                         {item.desc}
                       </p>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -155,12 +176,12 @@ export const RoleBasedPlatform = ({
                 </button>
               </div> */}
 
-            </div>
+            </motion.div>
 
           </div>
-        </div>
+        </motion.div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

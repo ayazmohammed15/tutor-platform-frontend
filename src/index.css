@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -12,10 +16,13 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
+  max-width: 100vw;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
     'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
     'Helvetica Neue', sans-serif;
@@ -23,27 +30,37 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+img {
+  display: block;
+  max-width: 100%;
+}
+
 #root {
   min-height: 100vh;
 }
 
-.landing-page button,
-.landing-page a {
+section[id],
+[id] {
+  scroll-margin-top: 100px;
+}
+
+button,
+a {
   -webkit-tap-highlight-color: transparent;
 }
 
-.landing-page button {
+button {
   transition-property: transform, box-shadow, background-color, border-color, color;
   transition-duration: 200ms;
   transition-timing-function: ease;
 }
 
-.landing-page button:active {
+button:active {
   transform: translateY(0) scale(0.98);
 }
 
-.landing-page button:focus-visible,
-.landing-page a:focus-visible {
+button:focus-visible,
+a:focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.65);
 }
@@ -91,6 +108,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 
   .animate-hero-fade,

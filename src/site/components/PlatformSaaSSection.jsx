@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
-  Calendar,
   Video,
-  CreditCard,
-  BookOpen,
-  Clock,
   CheckCircle2,
-  TrendingUp,
-  UserCheck,
-  Bell,
-  ExternalLink,
-  ChevronRight,
   Sparkles
 } from 'lucide-react';
 import { IMAGES } from '../data/images';
 
 export const PlatformSaaSSection = () => {
   const [activeTab, setActiveTab] = useState('schedule');
+  const reduceMotion = useReducedMotion();
 
   return (
-    <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-slate-900 text-white relative overflow-hidden"
+    >
       {/* Subtle Glows */}
       <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-10 right-0 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
@@ -44,7 +43,13 @@ export const PlatformSaaSSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
           {/* Left: Real Student Using Dashboard Image */}
-          <div className="lg:col-span-4 relative order-2 lg:order-1">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: -24 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-4 relative order-2 lg:order-1"
+          >
             <div className="relative rounded-2xl overflow-hidden border border-slate-700 shadow-2xl bg-slate-800">
               <img
                 src={IMAGES.saasStudentUsingApp}
@@ -65,10 +70,16 @@ export const PlatformSaaSSection = () => {
                 <p className="text-[10px] text-slate-400 mt-1">— Ananya P., Class 12 JEE Aspirant</p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right: High-Fidelity Interactive SaaS Product Mockup */}
-          <div className="lg:col-span-8 order-1 lg:order-2">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: 24 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-8 order-1 lg:order-2"
+          >
             <div className="bg-slate-950/90 rounded-2xl border border-slate-800 shadow-2xl p-4 sm:p-6 backdrop-blur-xl">
 
               {/* Mockup Header Bar */}
@@ -222,11 +233,11 @@ export const PlatformSaaSSection = () => {
               )}
 
             </div>
-          </div>
+          </motion.div>
 
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

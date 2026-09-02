@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { HeroSection } from '../components/HeroSection';
@@ -37,6 +37,22 @@ export function HomePage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authInitialRole, setAuthInitialRole] = useState('student');
   const [authInitialMode, setAuthInitialMode] = useState('signin');
+
+  useEffect(() => {
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
+
+  useEffect(() => {
+    const shouldLockScroll = Boolean(findTutorOpen || consultationOpen || authOpen || selectedTutorForBooking);
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = shouldLockScroll ? 'hidden' : previousOverflow;
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [findTutorOpen, consultationOpen, authOpen, selectedTutorForBooking]);
 
   // Modal Handlers
   const handleOpenFindTutor = (query) => {

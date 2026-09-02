@@ -1,10 +1,19 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Star, Quote, CheckCircle2, Sparkles } from 'lucide-react';
 import { TESTIMONIALS_DATA } from '../data/content';
 
 export const StudentStories = () => {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section className="py-20 bg-slate-50 relative">
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-slate-50 relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -23,10 +32,14 @@ export const StudentStories = () => {
 
         {/* 3 Authentic Editorial Testimonial Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {TESTIMONIALS_DATA.map((item) => (
-            <div
+          {TESTIMONIALS_DATA.map((item, index) => (
+            <motion.div
               key={item.id}
               id={`story-${item.id}`}
+              initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ delay: index * 0.08, duration: 0.45 }}
               className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-6 relative"
             >
               <div className="space-y-4">
@@ -70,11 +83,11 @@ export const StudentStories = () => {
                 </div>
               </div>
 
-            </div>
+            </motion.div>
           ))}
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

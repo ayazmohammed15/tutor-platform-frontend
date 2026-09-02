@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, BookOpen, CheckCircle, Award, Sparkles, Compass } from 'lucide-react';
-// import { COURSES_DATA } from '../data/content';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowRight, CheckCircle, Award, Sparkles, Compass } from 'lucide-react';
 import { tutorService } from '../../services/tutorService';
 import { IMAGES } from '../data/images';
 
@@ -10,6 +10,7 @@ export const ExamPreparation = ({
 }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const reduceMotion = useReducedMotion();
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -115,7 +116,14 @@ export const ExamPreparation = ({
     };
   };
   return (
-    <section id="courses" className="py-20 bg-slate-50 relative">
+    <motion.section
+      id="courses"
+      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      className="py-20 bg-slate-50 relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -139,13 +147,17 @@ export const ExamPreparation = ({
               Loading courses...
             </div>
           ) : (
-            courses.map((course) => {
+            courses.map((course, index) => {
               const displayData = getCourseDisplayData(course);
 
               return (
-                <div
+                <motion.div
                   key={course.id}
                   id={`exam-card-${course.id}`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 26 }}
+                  whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ delay: index * 0.08, duration: 0.5 }}
                   className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group"
                 >
                   {/* Large Photography Container */}
@@ -213,14 +225,20 @@ export const ExamPreparation = ({
                     </div>
 
                   </div>
-                </div>
+                </motion.div>
               );
             })
           )}
         </div>
 
         {/* Quick Help Strip under Exam Cards */}
-        <div className="mt-12 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.1, duration: 0.45 }}
+          className="mt-12 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6"
+        >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
               <Award className="w-6 h-6" />
@@ -250,9 +268,9 @@ export const ExamPreparation = ({
               NEET Biology
             </button>
           </div>
-        </div>
+        </motion.div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

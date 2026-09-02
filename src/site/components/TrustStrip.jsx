@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   ShieldCheck,
   Video,
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 
 export const TrustStrip = () => {
+  const reduceMotion = useReducedMotion();
   const trustItems = [
     {
       icon: ShieldCheck,
@@ -49,7 +51,13 @@ export const TrustStrip = () => {
   ];
 
   return (
-    <section className="bg-slate-900 text-white py-12 relative overflow-hidden">
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      className="bg-slate-900 text-white py-12 relative overflow-hidden"
+    >
       {/* Background Subtle Accent */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 opacity-90 pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -69,9 +77,13 @@ export const TrustStrip = () => {
           {trustItems.map((item, idx) => {
             const Icon = item.icon;
             return (
-              <div
+              <motion.div
                 key={idx}
                 id={`trust-item-${idx}`}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: idx * 0.06, duration: 0.45 }}
                 className="bg-slate-800/70 hover:bg-slate-800 border border-slate-700/80 rounded-xl p-4 flex flex-col items-center text-center transition-all duration-200 hover:-translate-y-1"
               >
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 border ${item.color}`}>
@@ -83,12 +95,12 @@ export const TrustStrip = () => {
                 <p className="text-[11px] text-slate-400 leading-tight">
                   {item.desc}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

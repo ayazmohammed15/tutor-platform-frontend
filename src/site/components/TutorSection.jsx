@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Star,
-  ShieldCheck,
-  BookOpen,
-  Calendar,
-  Clock,
-  ArrowRight,
-  Filter,
-  GraduationCap,
-  Sparkles
-} from 'lucide-react';
-// import { TUTORS_DATA } from '../data/content';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ShieldCheck, ArrowRight } from 'lucide-react';
 import { tutorService } from '../../services/tutorService';
 import { UPLOADS_BASE_URL } from '../../services/api';
 
@@ -22,6 +12,7 @@ export const TutorSection = ({
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const reduceMotion = useReducedMotion();
   useEffect(() => {
     const fetchTutors = async () => {
       try {
@@ -57,17 +48,15 @@ export const TutorSection = ({
           selectedSubject.toLowerCase()
       );
 
-  console.log('UPLOADS_BASE_URL:', UPLOADS_BASE_URL);
-  console.log('Tutor image:', tutors[0]?.profile_image);
-  console.log(
-    'Full image URL:',
-    tutors[0]?.profile_image
-      ? `${UPLOADS_BASE_URL}/${tutors[0].profile_image}`
-      : null
-  );
-
   return (
-    <section id="tutors" className="py-20 bg-white relative">
+    <motion.section
+      id="tutors"
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-white relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -103,10 +92,14 @@ export const TutorSection = ({
 
         {/* 8 Professional Indian Tutor Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredTutors.map((tutor) => (
-            <div
+          {filteredTutors.map((tutor, index) => (
+            <motion.div
               key={tutor.tutor_profile_id}
               id={`tutor-card-${tutor.tutor_profile_id}`}
+              initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ delay: index * 0.06, duration: 0.45 }}
               className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group p-5"
             >
               {/* Top: Portrait & Badge */}
@@ -175,12 +168,18 @@ export const TutorSection = ({
                 </div>
               </div>
 
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* View All Tutors Button */}
-        <div className="mt-12 text-center">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.1, duration: 0.45 }}
+          className="mt-12 text-center"
+        >
           <button
             id="view-all-tutors-cta"
             onClick={onOpenAllTutorsModal}
@@ -189,9 +188,9 @@ export const TutorSection = ({
             <span>View All Verified Tutors & Filter by Time</span>
             <ArrowRight className="w-4 h-4" />
           </button>
-        </div>
+        </motion.div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

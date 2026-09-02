@@ -1,13 +1,22 @@
 import React from 'react';
-import { Search, PhoneCall, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Search, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 import { IMAGES } from '../data/images';
 
 export const FinalCtaSection = ({
   onFindTutor,
   onOpenConsultation
 }) => {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section className="relative py-24 bg-slate-950 text-white overflow-hidden">
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="relative py-24 bg-slate-950 text-white overflow-hidden"
+    >
       {/* Full-width High-Res Indian Students Photography Background with Gradient Overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -21,21 +30,45 @@ export const FinalCtaSection = ({
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-8">
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.45 }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider"
+        >
           <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
           <span>TRANSFORM YOUR ACADEMIC GOALS</span>
-        </div>
+        </motion.div>
 
-        <h2 className="text-3xl sm:text-5xl font-semibold text-white tracking-tight leading-tight max-w-3xl mx-auto">
+        <motion.h2
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.06, duration: 0.45 }}
+          className="text-3xl sm:text-5xl font-semibold text-white tracking-tight leading-tight max-w-3xl mx-auto"
+        >
           Ready to start your learning journey?
-        </h2>
+        </motion.h2>
 
-        <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
+        <motion.p
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.12, duration: 0.45 }}
+          className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal"
+        >
           Find the right tutor, build stronger concepts, and move closer to your academic goals with personalized 1-on-1 attention and structured competitive courses.
-        </p>
+        </motion.p>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.18, duration: 0.45 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
+        >
           <button
             id="final-cta-get-started"
             onClick={onFindTutor}
@@ -54,10 +87,16 @@ export const FinalCtaSection = ({
             <PhoneCall className="w-4 h-4 text-blue-400" />
             <span>Speak to a Consultant</span>
           </button> */}
-        </div>
+        </motion.div>
 
         {/* Reassurance points */}
-        <div className="pt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-slate-400 font-medium">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.24, duration: 0.45 }}
+          className="pt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-slate-400 font-medium"
+        >
           <span className="flex items-center gap-1.5 text-emerald-400">
             <CheckCircle2 className="w-4 h-4" /> 100% Verified Tutors
           </span>
@@ -67,9 +106,9 @@ export const FinalCtaSection = ({
           <span className="flex items-center gap-1.5 text-indigo-400">
             <CheckCircle2 className="w-4 h-4" /> Easy Rescheduling
           </span>
-        </div>
+        </motion.div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };

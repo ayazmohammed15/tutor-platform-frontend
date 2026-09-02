@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -46,9 +47,21 @@ import { ContactPage } from './site/pages/ContactPage';
 // completeness per the migration but are NOT routed here — frontend's real
 // /login and /register (Login.jsx, Register.jsx) are wired to real backend auth.
 
+function ScrollManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <Router>
+      <ScrollManager />
       <AuthProvider>
         <Toaster
           position="top-right"

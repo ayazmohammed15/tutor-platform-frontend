@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   ShieldCheck,
   CalendarCheck,
@@ -6,8 +7,6 @@ import {
   CheckCircle,
   BookOpen,
   TrendingUp,
-  PhoneCall,
-  ArrowRight,
   HeartHandshake
 } from 'lucide-react';
 import { IMAGES } from '../data/images';
@@ -15,6 +14,7 @@ import { IMAGES } from '../data/images';
 export const ParentTrustSection = ({
   onOpenConsultation
 }) => {
+  const reduceMotion = useReducedMotion();
   const trustPoints = [
     {
       icon: ShieldCheck,
@@ -49,13 +49,25 @@ export const ParentTrustSection = ({
   ];
 
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55 }}
+      className="py-20 bg-white relative overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
           {/* Left: Large Authentic Indian Parent & Child Photograph */}
-          <div className="lg:col-span-5 relative">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: -24 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-5 relative"
+          >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-100 bg-slate-900 group">
               <img
                 src={IMAGES.parentTrustPhoto}
@@ -82,10 +94,16 @@ export const ParentTrustSection = ({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right: Copy & 6 Distinct Feature Points */}
-          <div className="lg:col-span-7 space-y-8">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: 24 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-7 space-y-8"
+          >
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider border border-emerald-200">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
@@ -106,9 +124,13 @@ export const ParentTrustSection = ({
               {trustPoints.map((point, idx) => {
                 const Icon = point.icon;
                 return (
-                  <div
+                  <motion.div
                     key={idx}
                     id={`parent-trust-point-${idx}`}
+                    initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ delay: idx * 0.06, duration: 0.45 }}
                     className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-emerald-50/30 hover:border-emerald-200 transition-colors"
                   >
                     <div className="flex items-start gap-2.5">
@@ -124,7 +146,7 @@ export const ParentTrustSection = ({
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -142,11 +164,11 @@ export const ParentTrustSection = ({
               </button>
             </div> */}
 
-          </div>
+          </motion.div>
 
         </div>
 
       </div>
-    </section>
+    </motion.section>
   );
 };
